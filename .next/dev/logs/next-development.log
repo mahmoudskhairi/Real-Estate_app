@@ -1,0 +1,24 @@
+[00:00:05.661] Server  LOG      ✓ Ready in 4.4s
+[00:01:04.288] Server  LOG      ○ Compiling / ...
+[00:01:13.919] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:22.095] Server  LOG      ○ Compiling /login ...
+[00:01:33.696] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin123"}
+[00:01:36.941] Server  LOG     <-- POST /api/auth/login
+[00:01:37.629] Server  ERROR   PrismaClientInitializationError: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$server$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].user.findUnique()` invocation in
+/home/mskhairi/Rea-Estate_app/.next/dev/server/chunks/[root-of-the-server]__111f7080._.js:97:158
+
+  94 });
+  95 auth.post('/login', (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$hono$2f$zod$2d$validator$2f$dist$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["zValidator"])('json', loginSchema), async (c)=>{
+  96     const { email, password } = c.req.valid('json');
+→ 97     const user = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$server$2f$db$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].user.findUnique(
+error: Environment variable not found: DATABASE_URL.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+[00:01:37.635] Server  LOG     --> POST /api/auth/login 500 690ms
+[00:01:37.766] Browser LOG     Response status: 500

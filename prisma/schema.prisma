@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SUPERVISOR
+  OPERATOR
+  CLIENT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum ClaimStatus {
+  SUBMITTED
+  IN_REVIEW
+  RESOLVED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(OPERATOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  assignedLeads     Lead[]    @relation("OperatorLeads")
+  assignedClaims    Claim[]   @relation("OperatorClaims")
+  createdComments   Comment[]
+  activityLogs      ActivityLog[]
+  clientProfile     Client?
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   @default("real_estate")
+  price       Decimal
+  metadata    Json?    // bedrooms, bathrooms, sqft, location, images, description
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  leads       LeadProduct[]
+  clients     ClientProduct[]
+}
+
+model Lead {
+  id          String      @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  status      LeadStatus  @default(NEW)
+  operatorId  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  operator    User?       @relation("OperatorLeads", fields: [operatorId], references: [id])
+  products    LeadProduct[]
+  comments    Comment[]
+  activityLogs ActivityLog[]
+}
+
+model LeadProduct {
+  leadId    String
+  productId String
+  lead      Lead    @relation(fields: [leadId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@id([leadId, productId])
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    ClientProduct[]
+  claims      Claim[]
+}
+
+model ClientProduct {
+  clientId  String
+  productId String
+  client    Client  @relation(fields: [clientId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@id([clientId, productId])
+}
+
+model Claim {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  status      ClaimStatus @default(SUBMITTED)
+  clientId    String
+  operatorId  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  client      Client      @relation(fields: [clientId], references: [id])
+  operator    User?       @relation("OperatorClaims", fields: [operatorId], references: [id])
+  attachments Attachment[]
+  comments    Comment[]
+  activityLogs ActivityLog[]
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  url       String
+  name      String
+  type      String
+  claimId   String?
+  createdAt DateTime @default(now())
+
+  claim     Claim?   @relation(fields: [claimId], references: [id])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  leadId    String?
+  claimId   String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  lead      Lead?    @relation(fields: [leadId], references: [id])
+  claim     Claim?   @relation(fields: [claimId], references: [id])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   Json?
+  userId    String
+  leadId    String?
+  claimId   String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  lead      Lead?    @relation(fields: [leadId], references: [id])
+  claim     Claim?   @relation(fields: [claimId], references: [id])
+}
