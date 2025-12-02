@@ -1,17 +1,8 @@
-[00:00:08.715] Server  LOG      ✓ Ready in 7.3s
-[00:00:11.839] Server  LOG      ○ Compiling / ...
-[00:00:34.681] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:41.473] Server  LOG      ○ Compiling /login ...
-[00:00:50.635] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin123"}
-[00:00:55.899] Server  LOG     <-- POST /api/auth/login
-[00:00:55.905] Server  LOG     --> POST /api/auth/login 404 3ms
-[00:00:56.027] Browser LOG     Response status: 404
-[00:02:33.507] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:02:50.898] Server  LOG     <-- POST /api/auth/login
-[00:02:50.912] Server  LOG     --> POST /api/auth/login 404 12ms
-[00:02:50.933] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin123"}
-[00:02:51.043] Browser LOG     Response status: 404
-[00:03:11.341] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:15.684] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:04:39.965] Server  LOG     <-- GET /api/auth/login
-[00:04:39.998] Server  LOG     --> GET /api/auth/login 404 32ms
+[00:00:02.257] Server  LOG      ✓ Ready in 1594ms
+[00:00:20.861] Server  LOG     <-- GET /api/health
+[00:00:20.871] Server  LOG     --> GET /api/health 404 5ms
+[00:00:31.581] Server  LOG     <-- POST /api/auth/login
+[00:00:31.587] Server  LOG     --> POST /api/auth/login 404 4ms
+[00:01:09.322] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
+[00:01:09.777] Server  LOG     [AUTH] User found, verifying password
+[00:01:09.984] Server  LOG     [AUTH] Login successful for: "admin@nexuserp.com"
