@@ -25,6 +25,11 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({ name: "", email: "", phone: "" });
   const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [notifications, setNotifications] = useState({
+    email: true,
+    push: false,
+    sms: true,
+  });
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [systemInfo, setSystemInfo] = useState({
     totalUsers: 0,
