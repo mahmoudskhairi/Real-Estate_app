@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
-    // Map to format the response
+    // Return leads with correct structure for Kanban board
     const formattedLeads = leads.map(lead => ({
       id: lead.id,
       title: lead.name,
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({
+    const formattedLead = {
       id: lead.id,
       title: lead.name,
       description: lead.phone || '',
@@ -107,7 +107,9 @@ export async function POST(request: NextRequest) {
       assignedToId: lead.operatorId,
       createdAt: lead.createdAt.toISOString(),
       updatedAt: lead.updatedAt.toISOString(),
-    }, { status: 201 })
+    }
+
+    return NextResponse.json(formattedLead, { status: 201 })
   } catch (error) {
     console.error('[LEADS] Create error:', error)
     return NextResponse.json({ error: 'Failed to create lead' }, { status: 500 })

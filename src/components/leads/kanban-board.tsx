@@ -17,18 +17,7 @@ import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./kanban-column";
 import { KanbanCard } from "./kanban-card";
 import { toast } from "sonner";
-
-interface Lead {
-  id: string;
-  title: string;
-  description?: string;
-  status: string;
-  contactName: string;
-  contactEmail: string;
-  assignedToId?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Lead } from "@prisma/client";
 
 const defaultCols = [
   { id: "NEW", title: "New" },
@@ -59,7 +48,18 @@ export function KanbanBoard() {
         const data = await response.json();
         // Validate that data is an array
         if (Array.isArray(data)) {
-          setItems(data);
+          // Map the response to match Lead structure
+          const leads = data.map((item: any) => ({
+            id: item.id,
+            name: item.contactName || item.title,
+            email: item.contactEmail,
+            phone: item.description || '',
+            status: item.status,
+            operatorId: item.assignedToId,
+            createdAt: new Date(item.createdAt),
+            updatedAt: new Date(item.updatedAt),
+          }));
+          setItems(leads as Lead[]);
         } else {
           console.error('Invalid data format:', data);
           setItems([]);
