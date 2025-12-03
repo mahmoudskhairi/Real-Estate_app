@@ -12,3 +12,5 @@
 [00:04:09.395] Browser LOG     Response status: 200
 [00:04:09.395] Browser LOG     Response data: {"user":{"email":"admin@nexuserp.com","emailNotifications":true,"id":"cmioh76pj00004wdts5laqek2","name":"Admin User","phone":"+212614368799","pushNotifications":true,"role":"ADMIN","smsNotifications":true,"theme":"light"}}
 [00:04:12.327] Server  LOG      ○ Compiling /dashboard ...
+[00:16:22.745] Server  LOG      ✓ Compiled in 23.1s
+[00:17:06.071] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold

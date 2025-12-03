@@ -29,9 +29,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, UserPlus, Loader2, Mail, Shield, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { hasPermission, canCreateUserRole } from "@/lib/auth";
+import { toast } from "@/lib/toast";
 
 interface User {
   id: string;
