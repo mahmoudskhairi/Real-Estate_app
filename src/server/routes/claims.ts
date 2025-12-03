@@ -11,7 +11,7 @@ claims.use('*', authMiddleware)
 const createClaimSchema = z.object({
   title: z.string(),
   description: z.string(),
-  clientId: z.string(),
+  clientId: z.string().optional(), // Optional for CLIENT users
 })
 
 claims.get('/', async (c) => {
@@ -51,14 +51,43 @@ claims.get('/', async (c) => {
 })
 
 claims.post('/', zValidator('json', createClaimSchema), async (c) => {
+  const user = c.get('user')
   const { title, description, clientId } = c.req.valid('json')
+  
+  let finalClientId = clientId
+  
+  // If user is CLIENT, automatically find their client profile
+  if (user.role === 'CLIENT') {
+    const clientProfile = await prisma.client.findUnique({
+      where: { userId: user.id },
+    })
+    
+    if (!clientProfile) {
+      // Create client profile if it doesn't exist
+      const newClientProfile = await prisma.client.create({
+        data: { userId: user.id },
+      })
+      finalClientId = newClientProfile.id
+    } else {
+      finalClientId = clientProfile.id
+    }
+  } else {
+    // Non-client users must provide clientId
+    if (!clientId) {
+      return c.json({ error: 'clientId is required for non-client users' }, 400)
+    }
+  }
   
   const claim = await prisma.claim.create({
     data: {
       title,
       description,
-      clientId,
+      clientId: finalClientId,
       status: 'SUBMITTED',
+    },
+    include: {
+      client: { include: { user: { select: { name: true } } } },
+      operator: { select: { name: true } },
     },
   })
   

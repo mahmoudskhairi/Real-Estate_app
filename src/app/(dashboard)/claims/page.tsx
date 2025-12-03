@@ -53,9 +53,11 @@ export default function ClaimsPage() {
   const canAddClaim = user?.role === 'CLIENT';
   const fetchClaims = async () => {
     try {
+      console.log('Fetching claims for user:', user?.email, 'role:', user?.role);
       const response = await fetch('/api/claims');
       if (response.ok) {
         const data = await response.json();
+        console.log('Claims data received:', data);
         if (Array.isArray(data)) {
           setClaims(data);
         } else {
@@ -65,7 +67,7 @@ export default function ClaimsPage() {
         }
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Failed to load claims' }));
-        console.error('API error:', errorData);
+        console.error('API error:', response.status, errorData);
         setClaims([]);
         toast.error(errorData.message || 'Failed to load claims');
       }
@@ -90,38 +92,31 @@ export default function ClaimsPage() {
       return;
     }
 
-    // Find client profile for this user
-    try {
-      const clientResponse = await fetch('/api/clients');
-      if (!clientResponse.ok) {
-        toast.error('Failed to get client profile');
-        return;
-      }
-      
-      const clients = await clientResponse.json();
-      const clientProfile = Array.isArray(clients) ? clients.find((c: any) => c.userId === user.id) : null;
-      
-      if (!clientProfile) {
-        toast.error('Client profile not found');
-        return;
-      }
+    if (!formData.title.trim() || !formData.description.trim()) {
+      toast.error('Please fill in all fields');
+      return;
+    }
 
+    try {
+      // For CLIENT users, the server will automatically find their client profile
       const response = await fetch('/api/claims', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          clientId: clientProfile.id,
+          title: formData.title.trim(),
+          description: formData.description.trim(),
         }),
       });
 
       if (response.ok) {
+        const newClaim = await response.json();
         toast.success(`Claim "${formData.title}" submitted successfully!`);
         setOpen(false);
         setFormData({ title: "", description: "" });
-        fetchClaims();
+        fetchClaims(); // Refresh the claims list
       } else {
         const error = await response.json();
+        console.error('Server error:', error);
         toast.error(error.message || 'Failed to submit claim');
       }
     } catch (error) {
