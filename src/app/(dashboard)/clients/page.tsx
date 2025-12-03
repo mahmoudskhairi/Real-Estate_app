@@ -37,6 +37,7 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+  const [phoneError, setPhoneError] = useState("");
 
   const fetchClients = async () => {
     try {
@@ -70,8 +71,27 @@ export default function ClientsPage() {
     fetchClients();
   }, []);
 
+  const validatePhone = (phone: string): boolean => {
+    // Check if phone is empty (optional field)
+    if (!phone.trim()) return true;
+    
+    // Check if phone contains only valid characters and matches pattern
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
+    return phoneRegex.test(phone);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate phone number before submission
+    if (!validatePhone(formData.phone)) {
+      setPhoneError('Invalid phone number format. Please use a valid format like: +1 (555) 000-0000');
+      toast.error('Invalid phone number format');
+      return;
+    }
+    
+    setPhoneError("");
+    
     try {
       const response = await fetch('/api/clients', {
         method: 'POST',
@@ -148,11 +168,18 @@ export default function ClientsPage() {
                     onChange={(e) => {
                       const value = e.target.value.replace(/[^0-9+\-() ]/g, '');
                       setFormData({...formData, phone: value});
+                      // Clear error when user starts typing
+                      if (phoneError) setPhoneError("");
                     }}
                     pattern="[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}"
-                    className="border-pink-300 bg-white text-pink-900 placeholder:text-pink-400 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
+                    className={`border-pink-300 bg-white text-pink-900 placeholder:text-pink-400 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500 ${phoneError ? 'border-red-500 dark:border-red-500' : ''}`}
                     placeholder="+1 (555) 000-0000"
                   />
+                  {phoneError && (
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                      {phoneError}
+                    </p>
+                  )}
                 </div>
               </div>
               <DialogFooter>
