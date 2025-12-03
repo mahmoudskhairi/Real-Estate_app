@@ -40,7 +40,7 @@ export default function ClaimsPage() {
       <div className="rounded-lg border-2 border-amber-200 bg-white shadow-lg overflow-hidden dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
         <Table>
           <TableHeader>
-            <TableRow className="border-amber-100 bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 dark:border-slate-800 dark:bg-transparent dark:hover:bg-slate-900/50">
+            <TableRow className="border-amber-100 bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 dark:border-slate-800 dark:bg-slate-900 dark:from-slate-900 dark:to-slate-900">
               <TableHead className="text-amber-900 font-bold dark:text-slate-400 dark:font-medium">Title</TableHead>
               <TableHead className="text-orange-900 font-bold dark:text-slate-400 dark:font-medium">Client</TableHead>
               <TableHead className="text-rose-900 font-bold dark:text-slate-400 dark:font-medium">Status</TableHead>

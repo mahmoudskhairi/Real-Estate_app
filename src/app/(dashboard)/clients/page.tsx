@@ -165,7 +165,7 @@ export default function ClientsPage() {
       <div className="rounded-lg border border-indigo-200 bg-white shadow-lg overflow-hidden dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
         <Table>
           <TableHeader>
-            <TableRow className="border-indigo-100 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:border-slate-800 dark:bg-transparent dark:hover:bg-slate-900/50">
+            <TableRow className="border-indigo-100 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:border-slate-800 dark:bg-slate-900 dark:from-slate-900 dark:to-slate-900">
               <TableHead className="text-indigo-900 font-bold dark:text-slate-400 dark:font-medium">Name</TableHead>
               <TableHead className="text-purple-900 font-bold dark:text-slate-400 dark:font-medium">Email</TableHead>
               <TableHead className="text-pink-900 font-bold dark:text-slate-400 dark:font-medium">Phone</TableHead>

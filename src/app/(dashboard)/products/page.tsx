@@ -182,7 +182,7 @@ export default function ProductsPage() {
       <div className="rounded-lg border-2 border-emerald-200 bg-white shadow-lg overflow-hidden dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
         <Table>
           <TableHeader>
-            <TableRow className="border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:border-slate-800 dark:bg-transparent dark:hover:bg-slate-900/50">
+            <TableRow className="border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:border-slate-800 dark:bg-slate-900 dark:from-slate-900 dark:to-slate-900">
               <TableHead className="text-emerald-900 font-bold dark:text-slate-400 dark:font-medium">Name</TableHead>
               <TableHead className="text-teal-900 font-bold dark:text-slate-400 dark:font-medium">Type</TableHead>
               <TableHead className="text-cyan-900 font-bold text-right dark:text-slate-400 dark:font-medium">Price</TableHead>
