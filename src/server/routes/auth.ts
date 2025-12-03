@@ -22,7 +22,22 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
 
     console.log('[AUTH] Login attempt for:', email)
 
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        name: true,
+        phone: true,
+        role: true,
+        emailNotifications: true,
+        pushNotifications: true,
+        smsNotifications: true,
+        theme: true,
+      }
+    })
+    
     if (!user) {
       console.log('[AUTH] User not found:', email)
       return c.json({ error: 'Invalid credentials' }, 401)
@@ -59,11 +74,11 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
         email: user.email, 
         role: user.role, 
         name: user.name,
-        phone: user.phone,
-        emailNotifications: user.emailNotifications,
-        pushNotifications: user.pushNotifications,
-        smsNotifications: user.smsNotifications,
-        theme: user.theme,
+        phone: user.phone || null,
+        emailNotifications: user.emailNotifications ?? true,
+        pushNotifications: user.pushNotifications ?? false,
+        smsNotifications: user.smsNotifications ?? true,
+        theme: user.theme || 'dark',
       } 
     })
   } catch (error) {
