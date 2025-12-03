@@ -114,64 +114,64 @@ export default function ProductsPage() {
               Add Property
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-white border-emerald-200 dark:bg-slate-950 dark:border-slate-800">
             <DialogHeader>
-              <DialogTitle>Add New Property</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-emerald-900 dark:text-white">Add New Property</DialogTitle>
+              <DialogDescription className="text-emerald-700 dark:text-slate-400">
                 Create a new property listing. Fill in the details below.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name" className="text-slate-200">Property Name</Label>
+                  <Label htmlFor="name" className="text-emerald-900 font-semibold dark:text-slate-200 dark:font-normal">Property Name</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-emerald-300 bg-white text-emerald-900 placeholder:text-emerald-400 focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="Luxury Villa in Malibu"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="location" className="text-slate-200">Location</Label>
+                  <Label htmlFor="location" className="text-teal-900 font-semibold dark:text-slate-200 dark:font-normal">Location</Label>
                   <Input
                     id="location"
                     value={formData.location}
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-teal-300 bg-white text-teal-900 placeholder:text-teal-400 focus:border-teal-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="Malibu, California"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="price" className="text-slate-200">Price</Label>
+                  <Label htmlFor="price" className="text-cyan-900 font-semibold dark:text-slate-200 dark:font-normal">Price</Label>
                   <Input
                     id="price"
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-cyan-300 bg-white text-cyan-900 placeholder:text-cyan-400 focus:border-cyan-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="$12,500,000"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="type" className="text-slate-200">Type</Label>
+                  <Label htmlFor="type" className="text-emerald-900 font-semibold dark:text-slate-200 dark:font-normal">Type</Label>
                   <Input
                     id="type"
                     value={formData.type}
                     onChange={(e) => setFormData({...formData, type: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-emerald-300 bg-white text-emerald-900 placeholder:text-emerald-400 focus:border-emerald-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="Real Estate"
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-slate-700 text-slate-300">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:from-transparent dark:to-transparent">
                   Add Property
                 </Button>
               </DialogFooter>
