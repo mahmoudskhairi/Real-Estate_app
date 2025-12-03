@@ -91,53 +91,15 @@
   }
 }
 
-/* Light mode overrides for specific elements */
-.light {
-  background: #ffffff;
-  color: #0f172a;
-}
-
-.light .bg-gray-900,
-.light .bg-slate-900,
-.light .bg-slate-950 {
-  background-color: #f8fafc !important;
-  border-color: #e2e8f0 !important;
-}
-
-.light .bg-gray-800,
-.light .bg-slate-800 {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-}
-
-.light .text-white {
-  color: #0f172a !important;
-}
-
-.light .text-gray-400,
-.light .text-slate-400 {
-  color: #64748b !important;
-}
-
-.light .text-gray-300,
-.light .text-slate-300 {
-  color: #475569 !important;
-}
-
-.light .text-slate-200 {
-  color: #1e293b !important;
-}
-
-.light .text-slate-500 {
-  color: #64748b !important;
-}
-
-.light .border-gray-800,
-.light .border-slate-800 {
-  border-color: #e2e8f0 !important;
-}
-
-.light .border-gray-700,
-.light .border-slate-700 {
-  border-color: #cbd5e1 !important;
+/* Fun subtle animations and effects for light mode */
+@layer utilities {
+  .light .hover-lift:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .light .hover-scale:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s ease-in-out;
+  }
 }

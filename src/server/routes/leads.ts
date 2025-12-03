@@ -9,12 +9,20 @@ const leads = new Hono()
 leads.use('*', authMiddleware)
 
 const createLeadSchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
+  // Accept both old format (name, email) and new format (title, contactName, etc)
+  name: z.string().optional(),
+  title: z.string().optional(),
+  email: z.string().email().optional(),
+  contactEmail: z.string().email().optional(),
   phone: z.string().optional(),
+  contactName: z.string().optional(),
+  description: z.string().optional(),
   status: z.enum(['NEW', 'CONTACTED', 'QUALIFIED', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST']).optional(),
   operatorId: z.string().optional(),
-})
+}).refine(
+  (data) => (data.name || data.contactName) && (data.email || data.contactEmail),
+  { message: 'Either name/email or contactName/contactEmail must be provided' }
+)
 
 leads.get('/', async (c) => {
   const allLeads = await prisma.lead.findMany({
@@ -26,7 +34,21 @@ leads.get('/', async (c) => {
 
 leads.post('/', zValidator('json', createLeadSchema), async (c) => {
   const data = c.req.valid('json')
-  const lead = await prisma.lead.create({ data })
+  
+  // Transform frontend data to match schema
+  const leadData = {
+    name: data.name || data.contactName || 'Unknown',
+    email: data.email || data.contactEmail || '',
+    phone: data.phone,
+    status: data.status || 'NEW',
+    operatorId: data.operatorId,
+  }
+  
+  const lead = await prisma.lead.create({ 
+    data: leadData,
+    include: { operator: { select: { name: true } } }
+  })
+  
   return c.json(lead)
 })
 

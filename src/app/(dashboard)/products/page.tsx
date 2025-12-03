@@ -104,7 +104,7 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight text-white">
+        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
           Properties
         </h2>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -179,25 +179,25 @@ export default function ProductsPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="rounded-md border border-slate-800 bg-slate-950/50 backdrop-blur-xl">
+      <div className="rounded-lg border-2 border-emerald-200 bg-white shadow-lg overflow-hidden dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
         <Table>
           <TableHeader>
-            <TableRow className="border-slate-800 hover:bg-slate-900/50">
-              <TableHead className="text-slate-400">Name</TableHead>
-              <TableHead className="text-slate-400">Type</TableHead>
-              <TableHead className="text-slate-400 text-right">Price</TableHead>
+            <TableRow className="border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:border-slate-800 dark:bg-transparent dark:hover:bg-slate-900/50">
+              <TableHead className="text-emerald-900 font-bold dark:text-slate-400 dark:font-medium">Name</TableHead>
+              <TableHead className="text-teal-900 font-bold dark:text-slate-400 dark:font-medium">Type</TableHead>
+              <TableHead className="text-cyan-900 font-bold text-right dark:text-slate-400 dark:font-medium">Price</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                <TableCell colSpan={3} className="text-center text-teal-600 py-8 dark:text-slate-400">
                   Loading properties...
                 </TableCell>
               </TableRow>
             ) : products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                <TableCell colSpan={3} className="text-center text-teal-600 py-8 dark:text-slate-400">
                   No properties found. Add your first property!
                 </TableCell>
               </TableRow>
@@ -205,13 +205,13 @@ export default function ProductsPage() {
               products.map((product) => (
                 <TableRow
                   key={product.id}
-                  className="border-slate-800 hover:bg-slate-900/50"
+                  className="border-emerald-50 hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 transition-all dark:border-slate-800 dark:hover:bg-slate-900/50 dark:hover:from-transparent dark:hover:to-transparent"
                 >
-                  <TableCell className="font-medium text-slate-200">
+                  <TableCell className="font-semibold text-emerald-700 dark:text-slate-200">
                     {product.name}
                   </TableCell>
-                  <TableCell className="text-slate-400">{product.category}</TableCell>
-                  <TableCell className="text-right text-slate-200">
+                  <TableCell className="text-teal-600 dark:text-slate-400">{product.category}</TableCell>
+                  <TableCell className="text-right font-bold text-cyan-700 dark:text-slate-200">
                     ${product.price.toLocaleString()}
                   </TableCell>
                 </TableRow>

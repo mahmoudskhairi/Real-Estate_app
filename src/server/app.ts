@@ -12,7 +12,7 @@ import clients from './routes/clients'
 import claims from './routes/claims'
 import prisma from './db'
 
-const app = new Hono()
+const app = new Hono().basePath('/api')
 
 app.use('*', logger())
 app.use('*', prettyJSON())

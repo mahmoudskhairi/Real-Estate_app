@@ -48,14 +48,14 @@ export function KanbanBoard() {
         const data = await response.json();
         // Validate that data is an array
         if (Array.isArray(data)) {
-          // Map the response to match Lead structure
+          // API returns leads with name, email, phone directly
           const leads = data.map((item: any) => ({
             id: item.id,
-            name: item.contactName || item.title,
-            email: item.contactEmail,
-            phone: item.description || '',
+            name: item.name,
+            email: item.email,
+            phone: item.phone || '',
             status: item.status,
-            operatorId: item.assignedToId,
+            operatorId: item.operatorId,
             createdAt: new Date(item.createdAt),
             updatedAt: new Date(item.updatedAt),
           }));
@@ -105,7 +105,7 @@ export function KanbanBoard() {
     const newStatus = defaultCols.find(col => col.id === overId)?.id;
     if (newStatus && newStatus !== lead.status) {
       try {
-        const response = await fetch(`/api/leads/${lead.id}`, {
+        const response = await fetch(`/api/leads/${lead.id}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: newStatus }),

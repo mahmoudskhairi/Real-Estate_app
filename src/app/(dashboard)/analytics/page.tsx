@@ -54,8 +54,8 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Analytics</h1>
-        <p className="text-slate-400">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent mb-2 dark:text-white dark:bg-none">Analytics</h1>
+        <p className="text-violet-700 font-medium dark:text-slate-400 dark:font-normal">
           Track your performance and key metrics
         </p>
       </div>
@@ -65,19 +65,19 @@ export default function AnalyticsPage() {
         {stats.map((stat) => (
           <Card
             key={stat.title}
-            className="border-slate-800 bg-slate-950/50 backdrop-blur-xl"
+            className="border-2 border-violet-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl"
           >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-400">
+              <CardTitle className="text-sm font-semibold text-violet-900 dark:text-slate-400 dark:font-medium">
                 {stat.title}
               </CardTitle>
-              <stat.icon className="h-4 w-4 text-slate-500" />
+              <stat.icon className="h-4 w-4 text-purple-600 dark:text-slate-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{stat.value}</div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent dark:text-white dark:bg-none">{stat.value}</div>
               <p
-                className={`text-xs flex items-center gap-1 mt-1 ${
-                  stat.trend === "up" ? "text-green-400" : "text-red-400"
+                className={`text-xs flex items-center gap-1 mt-1 font-semibold ${
+                  stat.trend === "up" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                 }`}
               >
                 <TrendingUp
@@ -95,10 +95,10 @@ export default function AnalyticsPage() {
       {/* Charts Section */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Revenue Chart */}
-        <Card className="border-slate-800 bg-slate-950/50 backdrop-blur-xl">
+        <Card className="border-2 border-violet-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Activity className="h-5 w-5 text-indigo-400" />
+            <CardTitle className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2 dark:text-white dark:bg-none">
+              <Activity className="h-5 w-5 text-violet-600 dark:text-indigo-400" />
               Monthly Revenue
             </CardTitle>
           </CardHeader>
@@ -106,16 +106,16 @@ export default function AnalyticsPage() {
             <div className="space-y-4">
               {monthlyData.map((data) => (
                 <div key={data.month} className="flex items-center gap-4">
-                  <div className="w-12 text-sm text-slate-400">
+                  <div className="w-12 text-sm font-semibold text-violet-700 dark:text-slate-400 dark:font-normal">
                     {data.month}
                   </div>
                   <div className="flex-1">
-                    <div className="h-8 bg-slate-800/50 rounded-md overflow-hidden">
+                    <div className="h-8 bg-violet-100 rounded-md overflow-hidden dark:bg-slate-800/50">
                       <div
-                        className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-md flex items-center justify-end px-2"
+                        className="h-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 rounded-md flex items-center justify-end px-2 dark:from-indigo-500 dark:to-cyan-500"
                         style={{ width: `${(data.revenue / 4) * 100}%` }}
                       >
-                        <span className="text-xs font-medium text-white">
+                        <span className="text-xs font-bold text-white">
                           ${data.revenue}M
                         </span>
                       </div>
@@ -128,10 +128,10 @@ export default function AnalyticsPage() {
         </Card>
 
         {/* Deals Chart */}
-        <Card className="border-slate-800 bg-slate-950/50 backdrop-blur-xl">
+        <Card className="border-2 border-fuchsia-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-cyan-400" />
+            <CardTitle className="bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2 dark:text-white dark:bg-none">
+              <Building2 className="h-5 w-5 text-fuchsia-600 dark:text-cyan-400" />
               Deals Closed
             </CardTitle>
           </CardHeader>
@@ -139,16 +139,16 @@ export default function AnalyticsPage() {
             <div className="space-y-4">
               {monthlyData.map((data) => (
                 <div key={data.month} className="flex items-center gap-4">
-                  <div className="w-12 text-sm text-slate-400">
+                  <div className="w-12 text-sm font-semibold text-fuchsia-700 dark:text-slate-400 dark:font-normal">
                     {data.month}
                   </div>
                   <div className="flex-1">
-                    <div className="h-8 bg-slate-800/50 rounded-md overflow-hidden">
+                    <div className="h-8 bg-fuchsia-100 rounded-md overflow-hidden dark:bg-slate-800/50">
                       <div
-                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-md flex items-center justify-end px-2"
+                        className="h-full bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-md flex items-center justify-end px-2 dark:from-cyan-500 dark:to-blue-500"
                         style={{ width: `${(data.deals / 14) * 100}%` }}
                       >
-                        <span className="text-xs font-medium text-white">
+                        <span className="text-xs font-bold text-white">
                           {data.deals}
                         </span>
                       </div>
@@ -163,47 +163,47 @@ export default function AnalyticsPage() {
 
       {/* Additional Insights */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-slate-800 bg-slate-950/50 backdrop-blur-xl">
+        <Card className="border-2 border-violet-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white text-sm">
+            <CardTitle className="text-violet-900 font-bold text-sm dark:text-white dark:font-semibold">
               Top Performing Agent
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-white">Sarah Johnson</div>
-              <p className="text-sm text-slate-400">12 deals closed</p>
-              <p className="text-xs text-green-400">+34% from last month</p>
+              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent dark:text-white dark:bg-none">Sarah Johnson</div>
+              <p className="text-sm font-semibold text-violet-700 dark:text-slate-400 dark:font-normal">12 deals closed</p>
+              <p className="text-xs font-semibold text-green-600 dark:text-green-400">+34% from last month</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-800 bg-slate-950/50 backdrop-blur-xl">
+        <Card className="border-2 border-purple-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white text-sm">
+            <CardTitle className="text-purple-900 font-bold text-sm dark:text-white dark:font-semibold">
               Average Deal Size
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-white">$544K</div>
-              <p className="text-sm text-slate-400">Last 30 days</p>
-              <p className="text-xs text-green-400">+18% from last month</p>
+              <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent dark:text-white dark:bg-none">$544K</div>
+              <p className="text-sm font-semibold text-purple-700 dark:text-slate-400 dark:font-normal">Last 30 days</p>
+              <p className="text-xs font-semibold text-green-600 dark:text-green-400">+18% from last month</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-800 bg-slate-950/50 backdrop-blur-xl">
+        <Card className="border-2 border-fuchsia-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-white text-sm">
+            <CardTitle className="text-fuchsia-900 font-bold text-sm dark:text-white dark:font-semibold">
               Pipeline Value
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-white">$24.8M</div>
-              <p className="text-sm text-slate-400">Active opportunities</p>
-              <p className="text-xs text-green-400">+26% from last month</p>
+              <div className="text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent dark:text-white dark:bg-none">$24.8M</div>
+              <p className="text-sm font-semibold text-fuchsia-700 dark:text-slate-400 dark:font-normal">Active opportunities</p>
+              <p className="text-xs font-semibold text-green-600 dark:text-green-400">+26% from last month</p>
             </div>
           </CardContent>
         </Card>

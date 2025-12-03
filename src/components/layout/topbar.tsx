@@ -30,13 +30,13 @@ export function Topbar() {
   };
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-800 bg-slate-950/50 px-6 backdrop-blur-xl">
+    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
       <div className="flex items-center gap-4">
         <div className="relative w-64">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-purple-400 dark:text-slate-500" />
           <Input
             placeholder="Search..."
-            className="pl-8 border-slate-800 bg-slate-900/50 text-slate-200 placeholder:text-slate-500 focus:border-indigo-500"
+            className="pl-8 border-indigo-200 bg-white text-gray-900 placeholder:text-purple-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-indigo-500 dark:focus:ring-0"
           />
         </div>
       </div>
@@ -44,7 +44,7 @@ export function Topbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-slate-400 hover:text-slate-100"
+          className="text-indigo-600 hover:text-purple-700 hover:bg-purple-50 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-transparent transition-all"
           onClick={() => toast.info('Notifications coming soon!')}
         >
           <Bell className="h-5 w-5" />
@@ -55,14 +55,14 @@ export function Topbar() {
             className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 hover:ring-2 hover:ring-indigo-400 transition-all cursor-pointer"
           />
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-48 rounded-md border border-slate-800 bg-slate-950 shadow-lg z-50">
+            <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-xl z-50 dark:border-slate-800 dark:bg-slate-950">
               <div className="py-1">
                 <button
                   onClick={() => {
                     router.push('/settings');
                     setShowProfileMenu(false);
                   }}
-                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-indigo-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-indigo-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors font-medium"
                 >
                   <Settings className="h-4 w-4" />
                   Settings
@@ -72,7 +72,7 @@ export function Topbar() {
                     handleLogout();
                     setShowProfileMenu(false);
                   }}
-                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-slate-800"
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-red-400 dark:hover:bg-slate-800 transition-colors font-medium"
                 >
                   <LogOut className="h-4 w-4" />
                   Logout

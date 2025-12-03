@@ -20,11 +20,11 @@ export function KanbanColumn({ id, title, items }: Props) {
   return (
     <div
       ref={setNodeRef}
-      className="flex h-full w-80 min-w-[20rem] flex-col rounded-lg border border-slate-800 bg-slate-950/30 backdrop-blur-sm"
+      className="flex h-full w-80 min-w-[20rem] flex-col rounded-xl border-2 border-indigo-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/30 dark:backdrop-blur-sm"
     >
-      <div className="p-4 font-semibold text-slate-200 border-b border-slate-800 flex justify-between items-center">
+      <div className="p-4 font-bold text-indigo-700 border-b-2 border-indigo-200 flex justify-between items-center bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:text-slate-200 dark:border-slate-800 dark:bg-transparent dark:from-transparent dark:via-transparent dark:to-transparent">
         {title}
-        <span className="text-xs bg-slate-800 px-2 py-1 rounded-full text-slate-400">
+        <span className="text-xs bg-gradient-to-r from-indigo-500 to-purple-500 px-3 py-1 rounded-full text-white font-bold shadow-md dark:bg-slate-800 dark:text-slate-400 dark:from-transparent dark:to-transparent dark:shadow-none">
           {items.length}
         </span>
       </div>

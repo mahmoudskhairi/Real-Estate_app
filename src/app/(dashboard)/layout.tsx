@@ -9,11 +9,11 @@ export default function DashboardLayout({
 }) {
   return (
     <Providers>
-      <div className="flex h-screen bg-black text-slate-200">
+      <div className="flex h-screen bg-white text-gray-900 dark:bg-black dark:text-slate-200">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Topbar />
-          <main className="flex-1 overflow-y-auto p-6 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-black to-black">
+          <main className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] dark:from-slate-900 dark:via-black dark:to-black">
             {children}
           </main>
         </div>

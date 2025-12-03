@@ -97,7 +97,7 @@ export default function ClientsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight text-white">
+        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
           Clients
         </h2>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -162,25 +162,25 @@ export default function ClientsPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="rounded-md border border-slate-800 bg-slate-950/50 backdrop-blur-xl">
+      <div className="rounded-lg border border-indigo-200 bg-white shadow-lg overflow-hidden dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
         <Table>
           <TableHeader>
-            <TableRow className="border-slate-800 hover:bg-slate-900/50">
-              <TableHead className="text-slate-400">Name</TableHead>
-              <TableHead className="text-slate-400">Email</TableHead>
-              <TableHead className="text-slate-400">Phone</TableHead>
+            <TableRow className="border-indigo-100 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:border-slate-800 dark:bg-transparent dark:hover:bg-slate-900/50">
+              <TableHead className="text-indigo-900 font-bold dark:text-slate-400 dark:font-medium">Name</TableHead>
+              <TableHead className="text-purple-900 font-bold dark:text-slate-400 dark:font-medium">Email</TableHead>
+              <TableHead className="text-pink-900 font-bold dark:text-slate-400 dark:font-medium">Phone</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                <TableCell colSpan={3} className="text-center text-indigo-600 py-8 dark:text-slate-400">
                   Loading clients...
                 </TableCell>
               </TableRow>
             ) : clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                <TableCell colSpan={3} className="text-center text-purple-600 py-8 dark:text-slate-400">
                   No clients found. Add your first client!
                 </TableCell>
               </TableRow>
@@ -188,13 +188,13 @@ export default function ClientsPage() {
               clients.map((client) => (
                 <TableRow
                   key={client.id}
-                  className="border-slate-800 hover:bg-slate-900/50"
+                  className="border-indigo-50 hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all dark:border-slate-800 dark:hover:bg-slate-900/50 dark:hover:from-transparent dark:hover:to-transparent"
                 >
-                  <TableCell className="font-medium text-slate-200">
+                  <TableCell className="font-semibold text-indigo-700 dark:text-slate-200">
                     {client.name}
                   </TableCell>
-                  <TableCell className="text-slate-400">{client.email}</TableCell>
-                  <TableCell className="text-slate-400">
+                  <TableCell className="text-purple-600 dark:text-slate-400">{client.email}</TableCell>
+                  <TableCell className="text-pink-600 dark:text-slate-400">
                     {client.phone || 'N/A'}
                   </TableCell>
                 </TableRow>

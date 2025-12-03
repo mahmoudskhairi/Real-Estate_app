@@ -55,7 +55,7 @@ export default function LeadsPage() {
   return (
     <div className="flex h-full flex-col space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight text-white">
+        <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
           Leads Pipeline
         </h2>
         <Dialog open={open} onOpenChange={setOpen}>
