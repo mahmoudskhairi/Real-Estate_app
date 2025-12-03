@@ -88,6 +88,17 @@ export function KanbanBoard() {
     setActiveId(event.active.id as string);
   }
 
+  function findContainer(id: string) {
+    // Check if it's a column ID
+    if (defaultCols.find(col => col.id === id)) {
+      return id;
+    }
+    
+    // Otherwise, find which column contains this lead
+    const lead = items.find(item => item.id === id);
+    return lead?.status;
+  }
+
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveId(null);
@@ -101,29 +112,40 @@ export function KanbanBoard() {
     const lead = items.find(item => item.id === activeId);
     if (!lead) return;
     
-    // Check if dropped on a column (status change)
-    const newStatus = defaultCols.find(col => col.id === overId)?.id;
-    if (newStatus && newStatus !== lead.status) {
-      try {
-        const response = await fetch(`/api/leads/${lead.id}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus }),
-        });
-        
-        if (response.ok) {
-          // Update local state
-          setItems(items.map(item => 
-            item.id === lead.id ? { ...item, status: newStatus } : item
-          ));
-          toast.success(`Lead moved to ${defaultCols.find(col => col.id === newStatus)?.title}`);
-        } else {
-          toast.error('Failed to update lead status');
-        }
-      } catch (error) {
-        console.error('Error updating lead:', error);
-        toast.error('Error updating lead');
+    // Find the target container (column)
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+    
+    if (!overContainer || activeContainer === overContainer) {
+      return; // No status change needed
+    }
+    
+    // Update optimistically
+    const updatedItems = items.map(item => 
+      item.id === lead.id ? { ...item, status: overContainer } : item
+    );
+    setItems(updatedItems);
+    
+    // Update on server
+    try {
+      const response = await fetch(`/api/leads/${lead.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: overContainer }),
+      });
+      
+      if (response.ok) {
+        toast.success(`Lead moved to ${defaultCols.find(col => col.id === overContainer)?.title}`);
+      } else {
+        // Revert on error
+        setItems(items);
+        toast.error('Failed to update lead status');
       }
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      // Revert on error
+      setItems(items);
+      toast.error('Error updating lead');
     }
   }
 
