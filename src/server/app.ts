@@ -5,6 +5,7 @@ import { prettyJSON } from 'hono/pretty-json'
 import { secureHeaders } from 'hono/secure-headers'
 import auth from './routes/auth'
 import users from './routes/users'
+import password from './routes/password'
 import leads from './routes/leads'
 import products from './routes/products'
 import clients from './routes/clients'
@@ -51,6 +52,7 @@ app.get('/health', async (c) => {
 
 app.route('/auth', auth)
 app.route('/users', users)
+app.route('/users', password)
 app.route('/leads', leads)
 app.route('/products', products)
 app.route('/clients', clients)
