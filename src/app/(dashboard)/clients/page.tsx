@@ -143,8 +143,13 @@ export default function ClientsPage() {
                   <Label htmlFor="phone" className="text-pink-900 font-semibold dark:text-slate-200 dark:font-normal">Phone</Label>
                   <Input
                     id="phone"
+                    type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9+\-() ]/g, '');
+                      setFormData({...formData, phone: value});
+                    }}
+                    pattern="[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}"
                     className="border-pink-300 bg-white text-pink-900 placeholder:text-pink-400 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="+1 (555) 000-0000"
                   />
