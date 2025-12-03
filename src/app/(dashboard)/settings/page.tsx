@@ -42,18 +42,11 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchUserData();
     fetchSystemInfo();
-    loadTheme();
     
     // Update system info every 30 seconds
     const interval = setInterval(fetchSystemInfo, 30000);
     return () => clearInterval(interval);
   }, []);
-
-  const loadTheme = () => {
-    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' || 'dark';
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle('light', savedTheme === 'light');
-  };
 
   const fetchUserData = async () => {
     try {
@@ -66,6 +59,15 @@ export default function SettingsPage() {
           email: data.email || "",
           phone: data.phone || "",
         });
+        setNotifications({
+          email: data.emailNotifications ?? true,
+          push: data.pushNotifications ?? false,
+          sms: data.smsNotifications ?? true,
+        });
+        const userTheme = (data.theme || 'dark') as 'dark' | 'light';
+        setTheme(userTheme);
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(userTheme);
       }
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -171,12 +173,66 @@ export default function SettingsPage() {
     }
   };
 
-  const handleThemeToggle = (checked: boolean) => {
+  const handleThemeToggle = async (checked: boolean) => {
     const newTheme = checked ? 'light' : 'dark';
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.classList.toggle('light', checked);
-    toast.success(`Switched to ${newTheme} mode`);
+    
+    // Apply theme immediately
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(newTheme);
+    
+    // Save to database
+    try {
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme: newTheme }),
+      });
+
+      if (response.ok) {
+        toast.success(`Switched to ${newTheme} mode`);
+      } else {
+        toast.error("Failed to save theme preference");
+        // Revert on error
+        const oldTheme = checked ? 'dark' : 'light';
+        setTheme(oldTheme);
+        document.documentElement.classList.remove('dark', 'light');
+        document.documentElement.classList.add(oldTheme);
+      }
+    } catch (error) {
+      console.error('Error saving theme:', error);
+      toast.error("Error saving theme preference");
+    }
+  };
+
+  const handleNotificationChange = async (type: 'email' | 'push' | 'sms', checked: boolean) => {
+    // Update local state immediately
+    setNotifications(prev => ({ ...prev, [type]: checked }));
+    
+    // Save to database
+    try {
+      const updateData: any = {};
+      if (type === 'email') updateData.emailNotifications = checked;
+      if (type === 'push') updateData.pushNotifications = checked;
+      if (type === 'sms') updateData.smsNotifications = checked;
+      
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        toast.error("Failed to save notification preference");
+        // Revert on error
+        setNotifications(prev => ({ ...prev, [type]: !checked }));
+      }
+    } catch (error) {
+      console.error('Error saving notification preference:', error);
+      toast.error("Error saving notification preference");
+      // Revert on error
+      setNotifications(prev => ({ ...prev, [type]: !checked }));
+    }
   };
 
   if (loading) {
@@ -288,9 +344,7 @@ export default function SettingsPage() {
               <Switch
                 id="email-notif"
                 checked={notifications.email}
-                onCheckedChange={(checked) =>
-                  setNotifications({ ...notifications, email: checked })
-                }
+                onCheckedChange={(checked) => handleNotificationChange('email', checked)}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -305,9 +359,7 @@ export default function SettingsPage() {
               <Switch
                 id="push-notif"
                 checked={notifications.push}
-                onCheckedChange={(checked) =>
-                  setNotifications({ ...notifications, push: checked })
-                }
+                onCheckedChange={(checked) => handleNotificationChange('push', checked)}
               />
             </div>
             <div className="flex items-center justify-between">
@@ -322,9 +374,7 @@ export default function SettingsPage() {
               <Switch
                 id="sms-notif"
                 checked={notifications.sms}
-                onCheckedChange={(checked) =>
-                  setNotifications({ ...notifications, sms: checked })
-                }
+                onCheckedChange={(checked) => handleNotificationChange('sms', checked)}
               />
             </div>
             <div className="pt-2 text-xs text-slate-500">

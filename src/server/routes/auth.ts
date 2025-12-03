@@ -51,10 +51,55 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
     })
 
     console.log('[AUTH] Login successful for:', email)
-    return c.json({ user: { id: user.id, email: user.email, role: user.role, name: user.name } })
+    return c.json({ 
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role, 
+        name: user.name,
+        phone: user.phone,
+        emailNotifications: user.emailNotifications,
+        pushNotifications: user.pushNotifications,
+        smsNotifications: user.smsNotifications,
+        theme: user.theme,
+      } 
+    })
   } catch (error) {
     console.error('[AUTH] Login error:', error)
     return c.json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }, 500)
+  }
+})
+
+auth.get('/me', async (c) => {
+  try {
+    const user = c.get('user')
+    if (!user) {
+      return c.json({ error: 'Not authenticated' }, 401)
+    }
+
+    const fullUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        emailNotifications: true,
+        pushNotifications: true,
+        smsNotifications: true,
+        theme: true,
+      },
+    })
+
+    if (!fullUser) {
+      return c.json({ error: 'User not found' }, 404)
+    }
+
+    return c.json(fullUser)
+  } catch (error) {
+    console.error('[AUTH] Error fetching user:', error)
+    return c.json({ error: 'Internal server error' }, 500)
   }
 })
 

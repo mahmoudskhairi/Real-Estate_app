@@ -47,4 +47,42 @@ users.post('/', zValidator('json', createUserSchema), async (c) => {
   return c.json(newUser)
 })
 
+const updateUserSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  emailNotifications: z.boolean().optional(),
+  pushNotifications: z.boolean().optional(),
+  smsNotifications: z.boolean().optional(),
+  theme: z.enum(['dark', 'light']).optional(),
+})
+
+users.patch('/:id', zValidator('json', updateUserSchema), async (c) => {
+  const id = c.req.param('id')
+  const updateData = c.req.valid('json')
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        role: true,
+        emailNotifications: true,
+        pushNotifications: true,
+        smsNotifications: true,
+        theme: true,
+      },
+    })
+
+    return c.json(updatedUser)
+  } catch (error) {
+    console.error('Error updating user:', error)
+    return c.json({ message: 'Failed to update user' }, 500)
+  }
+})
+
 export default users

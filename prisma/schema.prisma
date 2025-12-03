@@ -37,6 +37,13 @@ model User {
   name      String?
   phone     String?
   role      Role     @default(OPERATOR)
+  
+  // Preferences
+  emailNotifications Boolean @default(true)
+  pushNotifications  Boolean @default(false)
+  smsNotifications   Boolean @default(true)
+  theme             String  @default("dark")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
