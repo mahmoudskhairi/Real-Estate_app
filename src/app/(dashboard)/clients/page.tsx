@@ -43,12 +43,23 @@ export default function ClientsPage() {
       const response = await fetch('/api/clients');
       if (response.ok) {
         const data = await response.json();
-        setClients(data);
+        // Validate that data is an array
+        if (Array.isArray(data)) {
+          setClients(data);
+        } else {
+          console.error('Invalid data format:', data);
+          setClients([]);
+          toast.error('Invalid data format received');
+        }
       } else {
-        toast.error('Failed to load clients');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to load clients' }));
+        console.error('API error:', errorData);
+        setClients([]);
+        toast.error(errorData.message || 'Failed to load clients');
       }
     } catch (error) {
       console.error('Error fetching clients:', error);
+      setClients([]);
       toast.error('Error loading clients');
     } finally {
       setLoading(false);

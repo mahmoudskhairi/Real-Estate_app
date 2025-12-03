@@ -44,12 +44,23 @@ export default function ProductsPage() {
       const response = await fetch('/api/products');
       if (response.ok) {
         const data = await response.json();
-        setProducts(data);
+        // Validate that data is an array
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.error('Invalid data format:', data);
+          setProducts([]);
+          toast.error('Invalid data format received');
+        }
       } else {
-        toast.error('Failed to load properties');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to load properties' }));
+        console.error('API error:', errorData);
+        setProducts([]);
+        toast.error(errorData.message || 'Failed to load properties');
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts([]);
       toast.error('Error loading properties');
     } finally {
       setLoading(false);

@@ -57,12 +57,23 @@ export function KanbanBoard() {
       const response = await fetch('/api/leads');
       if (response.ok) {
         const data = await response.json();
-        setItems(data);
+        // Validate that data is an array
+        if (Array.isArray(data)) {
+          setItems(data);
+        } else {
+          console.error('Invalid data format:', data);
+          setItems([]);
+          toast.error('Invalid data format received');
+        }
       } else {
-        toast.error('Failed to load leads');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to load leads' }));
+        console.error('API error:', errorData);
+        setItems([]);
+        toast.error(errorData.message || 'Failed to load leads');
       }
     } catch (error) {
       console.error('Error fetching leads:', error);
+      setItems([]);
       toast.error('Error loading leads');
     } finally {
       setLoading(false);
