@@ -20,6 +20,7 @@ export const rolePermissions = {
     canAccessAnalytics: true,
     canAccessSettings: true,
     canManageUsers: true,
+    canDeleteUsers: true,
     canEditAllClaims: true,
   },
   SUPERVISOR: {
@@ -30,7 +31,8 @@ export const rolePermissions = {
     canAccessClaims: true,
     canAccessAnalytics: true,
     canAccessSettings: true,
-    canManageUsers: false,
+    canManageUsers: true,
+    canDeleteUsers: false,
     canEditAllClaims: true,
   },
   OPERATOR: {
@@ -41,7 +43,8 @@ export const rolePermissions = {
     canAccessClaims: true,
     canAccessAnalytics: false,
     canAccessSettings: true,
-    canManageUsers: false,
+    canManageUsers: true,
+    canDeleteUsers: false,
     canEditAllClaims: false,
   },
   CLIENT: {
@@ -53,6 +56,7 @@ export const rolePermissions = {
     canAccessAnalytics: false,
     canAccessSettings: true,
     canManageUsers: false,
+    canDeleteUsers: false,
     canEditAllClaims: false,
   },
 };
@@ -70,6 +74,7 @@ export function canAccessRoute(role: UserRole, route: string): boolean {
     '/claims': 'canAccessClaims',
     '/analytics': 'canAccessAnalytics',
     '/settings': 'canAccessSettings',
+    '/users': 'canManageUsers',
   };
 
   const permission = routePermissions[route];
@@ -85,4 +90,20 @@ export function getDefaultRoute(role: UserRole): string {
   }
   // All other roles go to dashboard
   return '/dashboard';
+}
+
+// Helper function to check if user can create specific role
+export function canCreateUserRole(currentUserRole: UserRole, targetRole: UserRole): boolean {
+  switch (currentUserRole) {
+    case 'ADMIN':
+      return ['SUPERVISOR', 'OPERATOR', 'CLIENT'].includes(targetRole);
+    case 'SUPERVISOR':
+      return ['OPERATOR', 'CLIENT'].includes(targetRole);
+    case 'OPERATOR':
+      return ['CLIENT'].includes(targetRole);
+    case 'CLIENT':
+      return false;
+    default:
+      return false;
+  }
 }
