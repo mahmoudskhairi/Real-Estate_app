@@ -1,0 +1,421 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Plus, UserPlus, Loader2, Mail, Shield, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { hasPermission, canCreateUserRole } from "@/lib/auth";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: "ADMIN" | "SUPERVISOR" | "OPERATOR" | "CLIENT";
+  createdAt: string;
+}
+
+export default function UsersPage() {
+  const [open, setOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    role: "" as "SUPERVISOR" | "OPERATOR" | "CLIENT" | "",
+  });
+  const [phoneError, setPhoneError] = useState("");
+  const { user } = useAuth();
+
+  const canManageUsers = user ? hasPermission(user.role, 'canManageUsers') : false;
+  const canDeleteUsers = user ? hasPermission(user.role, 'canDeleteUsers') : false;
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else {
+          console.error('Invalid data format:', data);
+          setUsers([]);
+          toast.error('Invalid data format received');
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to load users' }));
+        console.error('API error:', errorData);
+        setUsers([]);
+        toast.error(errorData.message || 'Failed to load users');
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsers([]);
+      toast.error('Error loading users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const validatePhone = (phone: string): boolean => {
+    if (!phone.trim()) return true;
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast.error('User not authenticated');
+      return;
+    }
+
+    if (!formData.name.trim() || !formData.email.trim() || !formData.password.trim() || !formData.role) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (!validatePhone(formData.phone)) {
+      setPhoneError('Invalid phone number format. Please use a valid format like: +1 (555) 000-0000');
+      toast.error('Invalid phone number format');
+      return;
+    }
+
+    if (!canCreateUserRole(user.role, formData.role)) {
+      toast.error(`You don't have permission to create ${formData.role} users`);
+      return;
+    }
+
+    setPhoneError("");
+
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim() || undefined,
+          password: formData.password.trim(),
+          role: formData.role,
+        }),
+      });
+
+      if (response.ok) {
+        const newUser = await response.json();
+        toast.success(`${formData.role} user "${formData.name}" created successfully!`);
+        setOpen(false);
+        setFormData({ name: "", email: "", phone: "", password: "", role: "" });
+        fetchUsers();
+      } else {
+        const error = await response.json();
+        console.error('Server error:', error);
+        toast.error(error.message || 'Failed to create user');
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast.error('Error creating user');
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!canDeleteUsers) {
+      toast.error("You don't have permission to delete users");
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success(`User "${userName}" deleted successfully`);
+        fetchUsers();
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to delete user');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Error deleting user');
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'ADMIN': return 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400';
+      case 'SUPERVISOR': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400';
+      case 'OPERATOR': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400';
+      case 'CLIENT': return 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400';
+      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-400';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const getAvailableRoles = () => {
+    if (!user) return [];
+    
+    const roles: Array<{value: "SUPERVISOR" | "OPERATOR" | "CLIENT", label: string}> = [];
+    
+    if (canCreateUserRole(user.role, 'SUPERVISOR')) {
+      roles.push({ value: 'SUPERVISOR', label: 'Supervisor' });
+    }
+    if (canCreateUserRole(user.role, 'OPERATOR')) {
+      roles.push({ value: 'OPERATOR', label: 'Operator' });
+    }
+    if (canCreateUserRole(user.role, 'CLIENT')) {
+      roles.push({ value: 'CLIENT', label: 'Client' });
+    }
+    
+    return roles;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
+            User Management
+          </h2>
+          <p className="text-indigo-700 font-medium dark:text-slate-400 dark:font-normal mt-2">
+            Manage system users and their access levels
+          </p>
+        </div>
+        {canManageUsers && (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:from-transparent dark:to-transparent">
+                <Plus className="mr-2 h-4 w-4" />
+                Add User
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-white border-indigo-200 dark:bg-slate-950 dark:border-slate-800 max-w-md">
+              <DialogHeader>
+                <DialogTitle className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:text-white dark:bg-none">Create New User</DialogTitle>
+                <DialogDescription className="text-indigo-700 dark:text-slate-400">
+                  Add a new user to the system with appropriate access level.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name" className="text-indigo-900 font-semibold dark:text-slate-200 dark:font-normal">Full Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      className="border-indigo-300 bg-white text-indigo-900 placeholder:text-indigo-400 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
+                      placeholder="John Doe"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="email" className="text-purple-900 font-semibold dark:text-slate-200 dark:font-normal">Email Address *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      className="border-purple-300 bg-white text-purple-900 placeholder:text-purple-400 focus:border-purple-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
+                      placeholder="john@company.com"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="phone" className="text-pink-900 font-semibold dark:text-slate-200 dark:font-normal">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9+\-() ]/g, '');
+                        setFormData({...formData, phone: value});
+                        if (phoneError) setPhoneError("");
+                      }}
+                      pattern="[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}"
+                      className={`border-pink-300 bg-white text-pink-900 placeholder:text-pink-400 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500 ${phoneError ? 'border-red-500 dark:border-red-500' : ''}`}
+                      placeholder="+1 (555) 000-0000"
+                    />
+                    {phoneError && (
+                      <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                        {phoneError}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password" className="text-indigo-900 font-semibold dark:text-slate-200 dark:font-normal">Password *</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      className="border-indigo-300 bg-white text-indigo-900 placeholder:text-indigo-400 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
+                      placeholder="••••••••"
+                      minLength={6}
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="role" className="text-purple-900 font-semibold dark:text-slate-200 dark:font-normal">Role *</Label>
+                    <Select value={formData.role} onValueChange={(value) => setFormData({...formData, role: value as typeof formData.role})}>
+                      <SelectTrigger className="border-purple-300 bg-white text-purple-900 focus:border-purple-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white">
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableRoles().map((role) => (
+                          <SelectItem key={role.value} value={role.value}>
+                            {role.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:from-transparent dark:to-transparent">
+                    Create User
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
+
+      <div className="rounded-lg border-2 border-indigo-200 bg-white shadow-lg overflow-hidden dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-indigo-100 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 dark:border-slate-800 dark:bg-slate-900 dark:from-slate-900 dark:to-slate-900">
+              <TableHead className="text-indigo-900 font-bold dark:text-slate-400 dark:font-medium">User</TableHead>
+              <TableHead className="text-purple-900 font-bold dark:text-slate-400 dark:font-medium">Contact</TableHead>
+              <TableHead className="text-pink-900 font-bold dark:text-slate-400 dark:font-medium">Role</TableHead>
+              <TableHead className="text-indigo-900 font-bold dark:text-slate-400 dark:font-medium">Created</TableHead>
+              {canDeleteUsers && (
+                <TableHead className="text-red-900 font-bold text-right dark:text-slate-400 dark:font-medium">Actions</TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={canDeleteUsers ? 5 : 4} className="text-center py-8 text-indigo-600 dark:text-slate-400">
+                  No users found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              users.map((usr) => (
+                <TableRow
+                  key={usr.id}
+                  className="border-indigo-50 hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all dark:border-slate-800 dark:hover:bg-slate-900/50 dark:hover:from-transparent dark:hover:to-transparent"
+                >
+                  <TableCell className="font-semibold text-indigo-700 dark:text-slate-200">
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                      <div>
+                        <div>{usr.name}</div>
+                        {usr.id === user?.id && (
+                          <div className="text-xs text-indigo-500 dark:text-indigo-400 font-normal mt-1">
+                            (You)
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-purple-600 dark:text-slate-400">
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      <div>
+                        <div className="text-sm">{usr.email}</div>
+                        {usr.phone && (
+                          <div className="text-xs text-purple-500 dark:text-slate-500">{usr.phone}</div>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="dark:text-slate-400">
+                    <div className="flex items-center gap-1">
+                      <Shield className="h-3 w-3" />
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getRoleColor(usr.role)}`}>
+                        {usr.role}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-indigo-700 dark:text-slate-200 font-medium">
+                    {formatDate(usr.createdAt)}
+                  </TableCell>
+                  {canDeleteUsers && (
+                    <TableCell className="text-right">
+                      {usr.id !== user?.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteUser(usr.id, usr.name)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
