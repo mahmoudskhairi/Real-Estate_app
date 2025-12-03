@@ -1,12 +1,44 @@
+"use client";
+
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import Providers from "@/components/providers";
+import { useAuth } from "@/hooks/useAuth";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { canAccessRoute, getDefaultRoute } from "@/lib/auth";
+import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, loading } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      // Check if user can access the current route
+      if (!canAccessRoute(user.role, pathname)) {
+        // Redirect to default route for this role
+        const defaultRoute = getDefaultRoute(user.role);
+        router.replace(defaultRoute);
+      }
+    }
+  }, [user, loading, pathname, router]);
+
+  if (loading) {
+    return (
+      <Providers>
+        <div className="flex h-screen items-center justify-center bg-white dark:bg-black">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        </div>
+      </Providers>
+    );
+  }
+
   return (
     <Providers>
       <div className="flex h-screen bg-white text-gray-900 dark:bg-black dark:text-slate-200">

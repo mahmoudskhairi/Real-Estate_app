@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Topbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -69,7 +71,15 @@ export function Topbar() {
             </svg>
           </button>
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-xl z-50 dark:border-slate-800 dark:bg-slate-950">
+            <div className="absolute right-0 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-xl z-50 dark:border-slate-800 dark:bg-slate-950">
+              <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-800">
+                <p className="text-sm font-semibold text-gray-900 dark:text-slate-200">
+                  {user?.name || user?.email}
+                </p>
+                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium mt-1">
+                  {user?.role || 'User'}
+                </p>
+              </div>
               <div className="py-1">
                 <button
                   onClick={() => {

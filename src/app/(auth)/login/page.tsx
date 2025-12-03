@@ -65,9 +65,9 @@ export default function LoginPage() {
 
       // Redirect based on role
       if (user.role === "CLIENT") {
-        router.push("/portal");
+        router.push("/claims"); // Clients go to claims page
       } else {
-        router.push("/dashboard");
+        router.push("/dashboard"); // Admins and others go to dashboard
       }
     } catch (error) {
       toast.error("Login failed", {

@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { canAccessRoute } from "@/lib/auth";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -29,6 +31,7 @@ const sidebarItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -57,24 +60,26 @@ export function Sidebar() {
       </div>
       <div className="flex-1 overflow-y-auto py-4">
         <nav className="space-y-1 px-2">
-          {sidebarItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg dark:bg-indigo-500/10 dark:text-indigo-400 dark:shadow-none dark:from-transparent dark:via-transparent dark:to-transparent"
-                    : "text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100 dark:hover:from-transparent dark:hover:to-transparent"
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            );
-          })}
+          {sidebarItems
+            .filter((item) => !user || canAccessRoute(user.role, item.href))
+            .map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg dark:bg-indigo-500/10 dark:text-indigo-400 dark:shadow-none dark:from-transparent dark:via-transparent dark:to-transparent"
+                      : "text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-indigo-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100 dark:hover:from-transparent dark:hover:to-transparent"
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
         </nav>
       </div>
       <div className="border-t border-gray-200 p-4 dark:border-slate-800">

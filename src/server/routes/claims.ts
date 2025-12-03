@@ -15,6 +15,31 @@ const createClaimSchema = z.object({
 })
 
 claims.get('/', async (c) => {
+  const user = c.get('user')
+  
+  // If user is CLIENT, only show their claims
+  if (user.role === 'CLIENT') {
+    // Find the client profile associated with this user
+    const clientProfile = await prisma.client.findUnique({
+      where: { userId: user.id },
+    })
+    
+    if (!clientProfile) {
+      return c.json([]) // No client profile yet
+    }
+    
+    const userClaims = await prisma.claim.findMany({
+      where: { clientId: clientProfile.id },
+      include: {
+        client: { include: { user: { select: { name: true } } } },
+        operator: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+    return c.json(userClaims)
+  }
+  
+  // For ADMIN, SUPERVISOR, OPERATOR - show all claims
   const allClaims = await prisma.claim.findMany({
     include: {
       client: { include: { user: { select: { name: true } } } },
