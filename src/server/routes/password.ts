@@ -3,8 +3,12 @@ import db from "../db";
 import bcrypt from "bcryptjs";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import { authMiddleware } from "../middleware/auth";
 
 const app = new Hono();
+
+// Apply auth middleware
+app.use('*', authMiddleware);
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -16,6 +20,12 @@ app.patch("/:id/password", zValidator("json", passwordSchema), async (c) => {
   try {
     const id = c.req.param("id");
     const { currentPassword, newPassword } = c.req.valid("json");
+    const currentUser = c.get('user');
+
+    // Users can only update their own password unless they're admin
+    if (currentUser.id !== id && currentUser.role !== 'ADMIN') {
+      return c.json({ message: 'Forbidden: You can only update your own password' }, 403);
+    }
 
     // Find user
     const user = await db.user.findUnique({

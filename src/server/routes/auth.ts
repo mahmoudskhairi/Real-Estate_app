@@ -9,6 +9,8 @@ import prisma from '../db'
 const auth = new Hono()
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret'
 
+import { authMiddleware } from '../middleware/auth'
+
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
@@ -70,7 +72,7 @@ auth.post('/login', zValidator('json', loginSchema), async (c) => {
   }
 })
 
-auth.get('/me', async (c) => {
+auth.get('/me', authMiddleware, async (c) => {
   try {
     const user = c.get('user')
     if (!user) {

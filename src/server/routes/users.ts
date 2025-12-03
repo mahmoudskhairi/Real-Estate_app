@@ -7,8 +7,8 @@ import { authMiddleware, roleMiddleware } from '../middleware/auth'
 
 const users = new Hono()
 
+// Apply auth middleware to all routes
 users.use('*', authMiddleware)
-users.use('*', roleMiddleware(['ADMIN']))
 
 const createUserSchema = z.object({
   email: z.string().email(),
@@ -17,14 +17,15 @@ const createUserSchema = z.object({
   role: z.enum(['ADMIN', 'SUPERVISOR', 'OPERATOR', 'CLIENT']),
 })
 
-users.get('/', async (c) => {
+// Admin only routes
+users.get('/', roleMiddleware(['ADMIN']), async (c) => {
   const allUsers = await prisma.user.findMany({
     select: { id: true, email: true, name: true, role: true, createdAt: true },
   })
   return c.json(allUsers)
 })
 
-users.post('/', zValidator('json', createUserSchema), async (c) => {
+users.post('/', roleMiddleware(['ADMIN']), zValidator('json', createUserSchema), async (c) => {
   const { email, password, name, role } = c.req.valid('json')
 
   const existingUser = await prisma.user.findUnique({ where: { email } })
@@ -60,6 +61,12 @@ const updateUserSchema = z.object({
 users.patch('/:id', zValidator('json', updateUserSchema), async (c) => {
   const id = c.req.param('id')
   const updateData = c.req.valid('json')
+  const currentUser = c.get('user')
+
+  // Users can only update their own profile unless they're admin
+  if (currentUser.id !== id && currentUser.role !== 'ADMIN') {
+    return c.json({ message: 'Forbidden: You can only update your own profile' }, 403)
+  }
 
   try {
     const updatedUser = await prisma.user.update({

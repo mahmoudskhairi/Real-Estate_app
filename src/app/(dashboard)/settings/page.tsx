@@ -110,28 +110,37 @@ export default function SettingsPage() {
 
     setSaving(true);
     try {
+      console.log('Updating profile for user:', user.id, profileData);
       const response = await fetch(`/api/users/${user.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profileData),
       });
 
+      console.log('Profile update response status:', response.status);
+      const data = await response.json();
+      console.log('Profile update response:', data);
+
       if (response.ok) {
         toast.success("Profile updated successfully!");
         await fetchUserData();
       } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to update profile");
+        toast.error(data.message || "Failed to update profile");
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error("Error updating profile");
+      toast.error("Error updating profile: " + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setSaving(false);
     }
   };
 
   const handlePasswordUpdate = async () => {
+    if (!user?.id) {
+      toast.error("User not loaded");
+      return;
+    }
+
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
       toast.error("Please fill in all password fields");
       return;
@@ -149,6 +158,7 @@ export default function SettingsPage() {
 
     setSaving(true);
     try {
+      console.log('Updating password for user:', user.id);
       const response = await fetch(`/api/users/${user.id}/password`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -158,22 +168,30 @@ export default function SettingsPage() {
         }),
       });
 
+      console.log('Password update response status:', response.status);
+      const data = await response.json();
+      console.log('Password update response:', data);
+
       if (response.ok) {
         toast.success("Password updated successfully!");
         setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
       } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to update password");
+        toast.error(data.message || "Failed to update password");
       }
     } catch (error) {
       console.error('Error updating password:', error);
-      toast.error("Error updating password");
+      toast.error("Error updating password: " + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleThemeToggle = async (checked: boolean) => {
+    if (!user?.id) {
+      toast.error("User not loaded");
+      return;
+    }
+
     const newTheme = checked ? 'light' : 'dark';
     setTheme(newTheme);
     
@@ -183,16 +201,21 @@ export default function SettingsPage() {
     
     // Save to database
     try {
+      console.log('Updating theme for user:', user.id, 'to:', newTheme);
       const response = await fetch(`/api/users/${user.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ theme: newTheme }),
       });
 
+      console.log('Theme update response status:', response.status);
+      const data = await response.json();
+      console.log('Theme update response:', data);
+
       if (response.ok) {
         toast.success(`Switched to ${newTheme} mode`);
       } else {
-        toast.error("Failed to save theme preference");
+        toast.error(data.message || "Failed to save theme preference");
         // Revert on error
         const oldTheme = checked ? 'dark' : 'light';
         setTheme(oldTheme);
@@ -201,11 +224,16 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Error saving theme:', error);
-      toast.error("Error saving theme preference");
+      toast.error("Error saving theme: " + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
   const handleNotificationChange = async (type: 'email' | 'push' | 'sms', checked: boolean) => {
+    if (!user?.id) {
+      toast.error("User not loaded");
+      return;
+    }
+
     // Update local state immediately
     setNotifications(prev => ({ ...prev, [type]: checked }));
     
@@ -216,20 +244,25 @@ export default function SettingsPage() {
       if (type === 'push') updateData.pushNotifications = checked;
       if (type === 'sms') updateData.smsNotifications = checked;
       
+      console.log('Updating notification for user:', user.id, updateData);
       const response = await fetch(`/api/users/${user.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
       });
 
+      console.log('Notification update response status:', response.status);
+      const data = await response.json();
+      console.log('Notification update response:', data);
+
       if (!response.ok) {
-        toast.error("Failed to save notification preference");
+        toast.error(data.message || "Failed to save notification preference");
         // Revert on error
         setNotifications(prev => ({ ...prev, [type]: !checked }));
       }
     } catch (error) {
       console.error('Error saving notification preference:', error);
-      toast.error("Error saving notification preference");
+      toast.error("Error saving notification: " + (error instanceof Error ? error.message : 'Unknown error'));
       // Revert on error
       setNotifications(prev => ({ ...prev, [type]: !checked }));
     }
