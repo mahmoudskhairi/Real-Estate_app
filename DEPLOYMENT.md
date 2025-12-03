@@ -23,12 +23,21 @@ This guide will help you deploy your Real Estate app to Vercel with a free Postg
    - PostgreSQL version: 16 (latest)
    - Click "Create project"
 
-4. **Copy Database Connection String:**
-   - After creation, you'll see a connection string like:
+4. **Copy Database Connection Strings:**
+   - After creation, you'll see TWO connection strings:
+   
+   **Pooled Connection (for DATABASE_URL):**
    ```
-   postgresql://username:password@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+   postgresql://username:password@ep-xxx-pooler.us-east-2.aws.neon.tech/neondb?pgbouncer=true
    ```
-   - **Save this!** You'll need it for Vercel
+   
+   **Direct Connection (for DIRECT_URL):**
+   ```
+   postgresql://username:password@ep-xxx.us-east-2.aws.neon.tech/neondb
+   ```
+   - **Save BOTH!** You'll need them for Vercel
+   - The pooled URL has `-pooler` in the hostname
+   - The direct URL doesn't have `-pooler`
 
 ---
 
@@ -53,17 +62,20 @@ This guide will help you deploy your Real Estate app to Vercel with a free Postg
    - Output Directory: Leave default (`.next`)
 
 5. **Environment Variables:**
-   Click "Environment Variables" and add:
+   Click "Environment Variables" and add these THREE variables:
 
    | Name | Value |
    |------|-------|
-   | `DATABASE_URL` | Your Neon connection string from Step 1 |
-   | `JWT_SECRET` | Generate a random string (e.g., `openssl rand -base64 32`) |
+   | `DATABASE_URL` | Your Neon **POOLED** connection string (with `-pooler`) |
+   | `DIRECT_URL` | Your Neon **DIRECT** connection string (without `-pooler`) |
+   | `JWT_SECRET` | Generate a random string (see below) |
 
    To generate JWT_SECRET in terminal:
    ```bash
    openssl rand -base64 32
    ```
+   
+   **Important:** The `DIRECT_URL` is required to avoid deployment timeout errors!
 
 6. **Deploy:**
    - Click "Deploy"
@@ -115,28 +127,27 @@ This guide will help you deploy your Real Estate app to Vercel with a free Postg
 
 ---
 
-## Step 3: Run Database Migrations
+## Step 3: Database Schema Deployment
 
-After successful deployment, you need to run migrations:
+**Good news!** The database schema is automatically deployed during the build process using `prisma db push`.
 
-### Method 1: Using Vercel CLI (Recommended)
+This happens automatically because:
+- Build command includes `prisma db push`
+- Uses `DIRECT_URL` to avoid connection timeouts
+- No manual migration steps needed!
 
-1. **Pull environment variables:**
-   ```bash
-   vercel env pull .env.production
-   ```
+### Manual Schema Update (if needed)
 
-2. **Run migrations:**
-   ```bash
-   npx prisma migrate deploy
-   ```
+If you need to manually update the schema:
 
-### Method 2: Using Neon SQL Editor
+```bash
+# Set environment variables
+export DATABASE_URL="your-pooled-url"
+export DIRECT_URL="your-direct-url"
 
-1. Go to your Neon project dashboard
-2. Click "SQL Editor"
-3. Copy and paste your migration SQL from `prisma/migrations/*/migration.sql`
-4. Execute the SQL
+# Push schema changes
+npx prisma db push
+```
 
 ---
 
@@ -172,15 +183,30 @@ Vercel automatically deploys when you push to GitHub:
 
 ## Environment Variables Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string from Neon | `postgresql://user:pass@host/db?sslmode=require` |
-| `JWT_SECRET` | Secret key for JWT tokens | Random 32+ character string |
-| `NODE_ENV` | Environment (auto-set by Vercel) | `production` |
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `DATABASE_URL` | Neon pooled connection (for app queries) | `postgresql://user:pass@host-pooler/db?pgbouncer=true` | ✅ Yes |
+| `DIRECT_URL` | Neon direct connection (for schema operations) | `postgresql://user:pass@host/db` | ✅ Yes |
+| `JWT_SECRET` | Secret key for JWT tokens | Random 32+ character string | ✅ Yes |
+| `NODE_ENV` | Environment (auto-set by Vercel) | `production` | Auto-set |
 
 ---
 
 ## Troubleshooting
+
+### ❌ Error P1002: Advisory Lock Timeout
+
+**Problem:** Build fails with "Timed out trying to acquire a postgres advisory lock"
+
+**Solution:** ✅ This is FIXED in the current configuration!
+- We use `prisma db push` instead of `prisma migrate deploy`
+- No advisory locks needed
+- Works with Neon's connection pooler
+
+If you still see this error:
+1. Verify you have `DIRECT_URL` set in Vercel environment variables
+2. Make sure `DIRECT_URL` is the direct connection (WITHOUT `-pooler`)
+3. Check `prisma/schema.prisma` has `directUrl = env("DIRECT_URL")`
 
 ### Build Fails - Prisma Error
 
@@ -192,23 +218,26 @@ Vercel automatically deploys when you push to GitHub:
 ### Database Connection Error
 
 **Solutions:**
-1. Verify `DATABASE_URL` has `?sslmode=require` at the end
+1. Verify both `DATABASE_URL` and `DIRECT_URL` are set
 2. Check Neon database is active (not suspended)
-3. Verify environment variable is set in Vercel
+3. Verify environment variables are set correctly in Vercel
+4. `DATABASE_URL` should have `-pooler` in hostname
+5. `DIRECT_URL` should NOT have `-pooler` in hostname
 
 ### API Routes Return 500
 
 **Solutions:**
 1. Check Vercel function logs (Vercel Dashboard → Deployments → View Function Logs)
-2. Verify all environment variables are set
-3. Ensure migrations are deployed
+2. Verify all THREE environment variables are set (`DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`)
+3. Check database connection is working
 
-### Migration Issues
+### Database Schema Not Updated
 
-**Solution:** Run migrations manually:
+**Solution:** Schema updates automatically during deployment. If needed manually:
 ```bash
-vercel env pull
-npx prisma migrate deploy
+# Use DIRECT_URL for schema operations
+export DATABASE_URL="your-direct-url"
+npx prisma db push
 ```
 
 ---

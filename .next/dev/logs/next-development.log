@@ -826,3 +826,5 @@
 [00:46:06.445] Server  LOG     --> PATCH /api/users/cmioh76pj00004wdts5laqek2 200 93ms
 [00:46:06.548] Browser LOG     Theme update response status: 200
 [00:46:06.549] Browser LOG     Theme update response: {"email":"admin@nexuserp.com","emailNotifications":true,"id":"cmioh76pj00004wdts5laqek2","name":"Admin User","phone":"+212614368799","pushNotifications":true,"role":"ADMIN","smsNotifications":true,"theme":"light"}
+[01:02:31.095] Server  LOG      ✓ Compiled in 17.9s
+[01:03:27.940] Server  LOG      ✓ Compiled in 405ms
