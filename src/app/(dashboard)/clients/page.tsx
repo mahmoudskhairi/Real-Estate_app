@@ -107,54 +107,54 @@ export default function ClientsPage() {
               Add Client
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-white border-indigo-200 dark:bg-slate-950 dark:border-slate-800">
             <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-indigo-900 dark:text-white">Add New Client</DialogTitle>
+              <DialogDescription className="text-indigo-700 dark:text-slate-400">
                 Create a new client profile. Fill in the details below.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="name" className="text-slate-200">Name</Label>
+                  <Label htmlFor="name" className="text-indigo-900 font-semibold dark:text-slate-200 dark:font-normal">Name</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-indigo-300 bg-white text-indigo-900 placeholder:text-indigo-400 focus:border-indigo-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="John Doe"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email" className="text-slate-200">Email</Label>
+                  <Label htmlFor="email" className="text-purple-900 font-semibold dark:text-slate-200 dark:font-normal">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-purple-300 bg-white text-purple-900 placeholder:text-purple-400 focus:border-purple-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="john@example.com"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="phone" className="text-slate-200">Phone</Label>
+                  <Label htmlFor="phone" className="text-pink-900 font-semibold dark:text-slate-200 dark:font-normal">Phone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-pink-300 bg-white text-pink-900 placeholder:text-pink-400 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="+1 (555) 000-0000"
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-slate-700 text-slate-300">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:from-transparent dark:to-transparent">
                   Add Client
                 </Button>
               </DialogFooter>

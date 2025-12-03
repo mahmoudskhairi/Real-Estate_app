@@ -65,65 +65,65 @@ export default function LeadsPage() {
               New Lead
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-white border-cyan-200 dark:bg-slate-950 dark:border-slate-800">
             <DialogHeader>
-              <DialogTitle>Create New Lead</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-cyan-900 dark:text-white">Create New Lead</DialogTitle>
+              <DialogDescription className="text-cyan-700 dark:text-slate-400">
                 Add a new lead to the pipeline. Fill in the details below.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="title" className="text-slate-200">Lead Title</Label>
+                  <Label htmlFor="title" className="text-blue-900 font-semibold dark:text-slate-200 dark:font-normal">Lead Title</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-blue-300 bg-white text-blue-900 placeholder:text-blue-400 focus:border-blue-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="Luxury Villa Interest"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="description" className="text-slate-200">Description</Label>
+                  <Label htmlFor="description" className="text-cyan-900 font-semibold dark:text-slate-200 dark:font-normal">Description</Label>
                   <Input
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-cyan-300 bg-white text-cyan-900 placeholder:text-cyan-400 focus:border-cyan-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="Interested in beachfront property"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="contactName" className="text-slate-200">Contact Name</Label>
+                  <Label htmlFor="contactName" className="text-teal-900 font-semibold dark:text-slate-200 dark:font-normal">Contact Name</Label>
                   <Input
                     id="contactName"
                     value={formData.contactName}
                     onChange={(e) => setFormData({...formData, contactName: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-teal-300 bg-white text-teal-900 placeholder:text-teal-400 focus:border-teal-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="Jane Smith"
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="contactEmail" className="text-slate-200">Contact Email</Label>
+                  <Label htmlFor="contactEmail" className="text-blue-900 font-semibold dark:text-slate-200 dark:font-normal">Contact Email</Label>
                   <Input
                     id="contactEmail"
                     type="email"
                     value={formData.contactEmail}
                     onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
-                    className="border-slate-800 bg-slate-900/50 text-white"
+                    className="border-blue-300 bg-white text-blue-900 placeholder:text-blue-400 focus:border-blue-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
                     placeholder="jane@example.com"
                     required
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-slate-700 text-slate-300">
+                <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-cyan-300 text-cyan-700 hover:bg-cyan-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" className="bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:from-transparent dark:to-transparent">
                   Create Lead
                 </Button>
               </DialogFooter>
