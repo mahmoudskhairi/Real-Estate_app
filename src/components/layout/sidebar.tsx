@@ -12,11 +12,12 @@ import {
   LogOut,
   PieChart,
   Briefcase,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { canAccessRoute } from "@/lib/auth";
+import { toast } from "@/lib/toast";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -25,6 +26,7 @@ const sidebarItems = [
   { icon: Building2, label: "Properties", href: "/products" },
   { icon: FileText, label: "Claims", href: "/claims" },
   { icon: PieChart, label: "Analytics", href: "/analytics" },
+  { icon: UserPlus, label: "Users", href: "/users" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 
