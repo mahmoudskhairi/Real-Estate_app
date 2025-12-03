@@ -6,19 +6,17 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting seed...')
 
-  // Clear existing data
-  await prisma.activityLog.deleteMany()
-  await prisma.comment.deleteMany()
-  await prisma.attachment.deleteMany()
-  await prisma.claim.deleteMany()
-  await prisma.clientProduct.deleteMany()
-  await prisma.leadProduct.deleteMany()
-  await prisma.client.deleteMany()
-  await prisma.product.deleteMany()
-  await prisma.lead.deleteMany()
-  await prisma.user.deleteMany()
+  // Check if admin user already exists
+  const existingAdmin = await prisma.user.findUnique({
+    where: { email: 'admin@nexuserp.com' }
+  })
 
-  console.log('✅ Cleared existing data')
+  if (existingAdmin) {
+    console.log('✅ Database already seeded - skipping to preserve existing data')
+    return
+  }
+
+  console.log('📝 Database is empty - creating initial data...')
 
   // Create Users
   const adminPassword = await bcrypt.hash('admin123', 10)

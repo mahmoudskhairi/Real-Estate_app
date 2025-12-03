@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
   "regions": ["iad1"],
-  "buildCommand": "prisma generate && prisma db push --skip-generate && npm run db:seed && next build"
+  "buildCommand": "prisma generate && prisma db push --skip-generate && next build"
 }
