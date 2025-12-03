@@ -24,6 +24,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({ name: "", email: "", phone: "" });
+  const [phoneError, setPhoneError] = useState("");
   const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [notifications, setNotifications] = useState({
     email: true,
@@ -110,11 +111,29 @@ export default function SettingsPage() {
     }
   };
 
+  const validatePhone = (phone: string): boolean => {
+    // Check if phone is empty (optional field)
+    if (!phone.trim()) return true;
+    
+    // Check if phone contains only valid characters and matches pattern
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
+    return phoneRegex.test(phone);
+  };
+
   const handleProfileSave = async () => {
     if (!user?.id) {
       toast.error("User not loaded");
       return;
     }
+
+    // Validate phone number before submission
+    if (!validatePhone(profileData.phone)) {
+      setPhoneError('Invalid phone number format. Please use a valid format like: +1 (555) 000-0000');
+      toast.error('Invalid phone number format');
+      return;
+    }
+    
+    setPhoneError("");
 
     setSaving(true);
     try {
@@ -335,11 +354,23 @@ export default function SettingsPage() {
                 </Label>
                 <Input
                   id="phone"
+                  type="tel"
                   value={profileData.phone}
-                  onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^0-9+\-() ]/g, '');
+                    setProfileData({...profileData, phone: value});
+                    // Clear error when user starts typing
+                    if (phoneError) setPhoneError("");
+                  }}
+                  pattern="[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}"
                   placeholder="+1 (555) 000-0000"
-                  className="border-pink-300 bg-white text-pink-900 placeholder:text-pink-400 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500"
+                  className={`border-pink-300 bg-white text-pink-900 placeholder:text-pink-400 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white dark:placeholder:text-slate-500 ${phoneError ? 'border-red-500 dark:border-red-500' : ''}`}
                 />
+                {phoneError && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    {phoneError}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-indigo-900 font-semibold dark:text-slate-200 dark:font-normal">
