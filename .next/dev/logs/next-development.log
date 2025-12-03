@@ -6,3 +6,28 @@
 [00:01:09.322] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
 [00:01:09.777] Server  LOG     [AUTH] User found, verifying password
 [00:01:09.984] Server  LOG     [AUTH] Login successful for: "admin@nexuserp.com"
+[00:03:05.840] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
+[00:03:05.848] Server  LOG     [AUTH] User found, verifying password
+[00:03:06.013] Server  LOG     [AUTH] Login successful for: "admin@nexuserp.com"
+[00:07:01.394] Server  LOG      ○ Compiling /login ...
+[00:07:36.178] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:59.560] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
+[00:07:59.602] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin123"}
+[00:07:59.802] Server  LOG     [AUTH] User found, verifying password
+[00:07:59.920] Server  LOG     [AUTH] Login successful for: "admin@nexuserp.com"
+[00:08:00.025] Browser LOG     Response status: 200
+[00:08:00.025] Browser LOG     Response data: {"user":{"email":"admin@nexuserp.com","id":"cmioh76pj00004wdts5laqek2","name":"Admin User","role":"ADMIN"}}
+[00:25:10.597] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:25:21.396] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
+[00:25:21.439] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin123"}
+[00:25:22.006] Server  LOG     [AUTH] User found, verifying password
+[00:25:22.134] Server  LOG     [AUTH] Login successful for: "admin@nexuserp.com"
+[00:25:22.320] Browser LOG     Response status: 200
+[00:25:22.321] Browser LOG     Response data: {"user":{"email":"admin@nexuserp.com","id":"cmioh76pj00004wdts5laqek2","name":"Admin User","role":"ADMIN"}}
+[00:36:10.822] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:36:15.847] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
+[00:36:15.899] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin123"}
+[00:36:16.138] Server  LOG     [AUTH] User found, verifying password
+[00:36:16.246] Server  LOG     [AUTH] Login successful for: "admin@nexuserp.com"
+[00:36:16.360] Browser LOG     Response status: 200
+[00:36:16.360] Browser LOG     Response data: {"user":{"email":"admin@nexuserp.com","id":"cmioh76pj00004wdts5laqek2","name":"Admin User","role":"ADMIN"}}
