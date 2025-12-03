@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { db } from "../db";
+import db from "../db";
 import bcrypt from "bcryptjs";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
