@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,33 +24,63 @@ import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-// Mock data
-const clients = [
-  {
-    id: "1",
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    status: "Active",
-  },
-  { id: "2", name: "Bob Smith", email: "bob@example.com", status: "Pending" },
-  {
-    id: "3",
-    name: "Charlie Brown",
-    email: "charlie@example.com",
-    status: "Active",
-  },
-];
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  createdAt: string;
+}
 
 export default function ClientsPage() {
   const [open, setOpen] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+
+  const fetchClients = async () => {
+    try {
+      const response = await fetch('/api/clients');
+      if (response.ok) {
+        const data = await response.json();
+        setClients(data);
+      } else {
+        toast.error('Failed to load clients');
+      }
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+      toast.error('Error loading clients');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add API call to create client
-    toast.success(`Client "${formData.name}" added successfully!`);
-    setOpen(false);
-    setFormData({ name: "", email: "", phone: "" });
+    try {
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast.success(`Client "${formData.name}" added successfully!`);
+        setOpen(false);
+        setFormData({ name: "", email: "", phone: "" });
+        fetchClients(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to add client');
+      }
+    } catch (error) {
+      console.error('Error creating client:', error);
+      toast.error('Error adding client');
+    }
   };
 
   return (
@@ -127,24 +157,38 @@ export default function ClientsPage() {
             <TableRow className="border-slate-800 hover:bg-slate-900/50">
               <TableHead className="text-slate-400">Name</TableHead>
               <TableHead className="text-slate-400">Email</TableHead>
-              <TableHead className="text-slate-400">Status</TableHead>
+              <TableHead className="text-slate-400">Phone</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clients.map((client) => (
-              <TableRow
-                key={client.id}
-                className="border-slate-800 hover:bg-slate-900/50"
-              >
-                <TableCell className="font-medium text-slate-200">
-                  {client.name}
-                </TableCell>
-                <TableCell className="text-slate-400">{client.email}</TableCell>
-                <TableCell className="text-slate-400">
-                  {client.status}
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                  Loading clients...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : clients.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                  No clients found. Add your first client!
+                </TableCell>
+              </TableRow>
+            ) : (
+              clients.map((client) => (
+                <TableRow
+                  key={client.id}
+                  className="border-slate-800 hover:bg-slate-900/50"
+                >
+                  <TableCell className="font-medium text-slate-200">
+                    {client.name}
+                  </TableCell>
+                  <TableCell className="text-slate-400">{client.email}</TableCell>
+                  <TableCell className="text-slate-400">
+                    {client.phone || 'N/A'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

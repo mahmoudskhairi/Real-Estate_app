@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,11 +17,54 @@ import {
 import { toast } from "sonner";
 
 export default function SettingsPage() {
+  const [user, setUser] = useState<any>(null);
+  const [profileData, setProfileData] = useState({ name: "", email: "", phone: "" });
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
     sms: true,
   });
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+        setProfileData({
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
+
+  const handleProfileSave = async () => {
+    try {
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileData),
+      });
+
+      if (response.ok) {
+        toast.success("Profile updated successfully!");
+        fetchUserData();
+      } else {
+        toast.error("Failed to update profile");
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error("Error updating profile");
+    }
+  };
 
   const handleSave = () => {
     toast.success("Settings saved successfully!");
@@ -53,7 +96,8 @@ export default function SettingsPage() {
                 </Label>
                 <Input
                   id="name"
-                  defaultValue="Admin User"
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({...profileData, name: e.target.value})}
                   className="border-slate-800 bg-slate-900/50 text-white placeholder:text-slate-500"
                 />
               </div>
@@ -64,7 +108,8 @@ export default function SettingsPage() {
                 <Input
                   id="email"
                   type="email"
-                  defaultValue="admin@nexuserp.com"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({...profileData, email: e.target.value})}
                   className="border-slate-800 bg-slate-900/50 text-white placeholder:text-slate-500"
                 />
               </div>
@@ -76,6 +121,8 @@ export default function SettingsPage() {
                 </Label>
                 <Input
                   id="phone"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
                   placeholder="+1 (555) 000-0000"
                   className="border-slate-800 bg-slate-900/50 text-white placeholder:text-slate-500"
                 />
@@ -86,14 +133,14 @@ export default function SettingsPage() {
                 </Label>
                 <Input
                   id="role"
-                  value="Administrator"
+                  value={user?.role || "Loading..."}
                   disabled
                   className="border-slate-800 bg-slate-900/50 text-slate-500"
                 />
               </div>
             </div>
             <Button
-              onClick={handleSave}
+              onClick={handleProfileSave}
               className="bg-indigo-600 hover:bg-indigo-700 text-white"
             >
               <Save className="h-4 w-4 mr-2" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { KanbanBoard } from "@/components/leads/kanban-board";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,14 +19,37 @@ import { toast } from "sonner";
 
 export default function LeadsPage() {
   const [open, setOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [formData, setFormData] = useState({ title: "", description: "", contactName: "", contactEmail: "" });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add API call to create lead
-    toast.success(`Lead "${formData.title}" created successfully!`);
-    setOpen(false);
-    setFormData({ title: "", description: "", contactName: "", contactEmail: "" });
+    try {
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          contactName: formData.contactName,
+          contactEmail: formData.contactEmail,
+          status: 'NEW',
+        }),
+      });
+
+      if (response.ok) {
+        toast.success(`Lead "${formData.title}" created successfully!`);
+        setOpen(false);
+        setFormData({ title: "", description: "", contactName: "", contactEmail: "" });
+        setRefreshTrigger(prev => prev + 1); // Trigger Kanban refresh
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to create lead');
+      }
+    } catch (error) {
+      console.error('Error creating lead:', error);
+      toast.error('Error creating lead');
+    }
   };
 
   return (
@@ -109,7 +132,7 @@ export default function LeadsPage() {
         </Dialog>
       </div>
       <div className="flex-1 overflow-hidden">
-        <KanbanBoard />
+        <KanbanBoard key={refreshTrigger} />
       </div>
     </div>
   );

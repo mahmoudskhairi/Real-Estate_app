@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,33 +24,70 @@ import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-// Mock data
-const products = [
-  {
-    id: "1",
-    name: "Luxury Villa in Malibu",
-    price: "$12,500,000",
-    type: "Real Estate",
-  },
-  {
-    id: "2",
-    name: "Downtown Penthouse",
-    price: "$4,200,000",
-    type: "Real Estate",
-  },
-  { id: "3", name: "Seaside Condo", price: "$850,000", type: "Real Estate" },
-];
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  category: string;
+  metadata?: any;
+}
 
 export default function ProductsPage() {
   const [open, setOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ name: "", price: "", type: "Real Estate", location: "" });
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('/api/products');
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+      } else {
+        toast.error('Failed to load properties');
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      toast.error('Error loading properties');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Add API call to create product
-    toast.success(`Property "${formData.name}" added successfully!`);
-    setOpen(false);
-    setFormData({ name: "", price: "", type: "Real Estate", location: "" });
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          description: `Located in ${formData.location}`,
+          price: parseFloat(formData.price.replace(/[$,]/g, '')),
+          category: formData.type,
+          metadata: { location: formData.location },
+        }),
+      });
+
+      if (response.ok) {
+        toast.success(`Property "${formData.name}" added successfully!`);
+        setOpen(false);
+        setFormData({ name: "", price: "", type: "Real Estate", location: "" });
+        fetchProducts(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to add property');
+      }
+    } catch (error) {
+      console.error('Error creating product:', error);
+      toast.error('Error adding property');
+    }
   };
 
   return (
@@ -141,20 +178,34 @@ export default function ProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
-              <TableRow
-                key={product.id}
-                className="border-slate-800 hover:bg-slate-900/50"
-              >
-                <TableCell className="font-medium text-slate-200">
-                  {product.name}
-                </TableCell>
-                <TableCell className="text-slate-400">{product.type}</TableCell>
-                <TableCell className="text-right text-slate-200">
-                  {product.price}
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                  Loading properties...
                 </TableCell>
               </TableRow>
-            ))}
+            ) : products.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} className="text-center text-slate-400 py-8">
+                  No properties found. Add your first property!
+                </TableCell>
+              </TableRow>
+            ) : (
+              products.map((product) => (
+                <TableRow
+                  key={product.id}
+                  className="border-slate-800 hover:bg-slate-900/50"
+                >
+                  <TableCell className="font-medium text-slate-200">
+                    {product.name}
+                  </TableCell>
+                  <TableCell className="text-slate-400">{product.category}</TableCell>
+                  <TableCell className="text-right text-slate-200">
+                    ${product.price.toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

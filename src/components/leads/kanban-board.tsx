@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -16,9 +16,20 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./kanban-column";
 import { KanbanCard } from "./kanban-card";
-import { Lead } from "@prisma/client"; // Assuming types are generated
+import { toast } from "sonner";
 
-// Mock data for now
+interface Lead {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  contactName: string;
+  contactEmail: string;
+  assignedToId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const defaultCols = [
   { id: "NEW", title: "New" },
   { id: "CONTACTED", title: "Contacted" },
@@ -30,8 +41,9 @@ const defaultCols = [
 ];
 
 export function KanbanBoard() {
-  const [items, setItems] = useState<Lead[]>([]); // Fetch from API
+  const [items, setItems] = useState<Lead[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -40,13 +52,76 @@ export function KanbanBoard() {
     })
   );
 
+  const fetchLeads = async () => {
+    try {
+      const response = await fetch('/api/leads');
+      if (response.ok) {
+        const data = await response.json();
+        setItems(data);
+      } else {
+        toast.error('Failed to load leads');
+      }
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+      toast.error('Error loading leads');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
   }
 
-  function handleDragEnd(event: DragEndEvent) {
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
     setActiveId(null);
-    // Handle status update API call here
+    
+    if (!over) return;
+    
+    const activeId = active.id as string;
+    const overId = over.id as string;
+    
+    // Find the lead being dragged
+    const lead = items.find(item => item.id === activeId);
+    if (!lead) return;
+    
+    // Check if dropped on a column (status change)
+    const newStatus = defaultCols.find(col => col.id === overId)?.id;
+    if (newStatus && newStatus !== lead.status) {
+      try {
+        const response = await fetch(`/api/leads/${lead.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        
+        if (response.ok) {
+          // Update local state
+          setItems(items.map(item => 
+            item.id === lead.id ? { ...item, status: newStatus } : item
+          ));
+          toast.success(`Lead moved to ${defaultCols.find(col => col.id === newStatus)?.title}`);
+        } else {
+          toast.error('Failed to update lead status');
+        }
+      } catch (error) {
+        console.error('Error updating lead:', error);
+        toast.error('Error updating lead');
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center text-slate-400">
+        Loading leads...
+      </div>
+    );
   }
 
   return (
