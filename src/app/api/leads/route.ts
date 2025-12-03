@@ -50,7 +50,20 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json({ leads })
+    // Map to format the response
+    const formattedLeads = leads.map(lead => ({
+      id: lead.id,
+      title: lead.name,
+      description: lead.phone || '',
+      status: lead.status,
+      contactName: lead.name,
+      contactEmail: lead.email,
+      assignedToId: lead.operatorId,
+      createdAt: lead.createdAt.toISOString(),
+      updatedAt: lead.updatedAt.toISOString(),
+    }))
+
+    return NextResponse.json(formattedLeads)
   } catch (error) {
     console.error('[LEADS] List error:', error)
     return NextResponse.json({ error: 'Failed to fetch leads' }, { status: 500 })
@@ -63,17 +76,17 @@ export async function POST(request: NextRequest) {
     const currentUser = await verifyAuth(request)
     
     const body = await request.json()
-    const { name, email, phone, status, operatorId } = body
+    const { title, description, contactName, contactEmail, status, operatorId } = body
 
-    if (!name || !email) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
+    if (!title || !contactEmail) {
+      return NextResponse.json({ error: 'Title and contact email are required' }, { status: 400 })
     }
 
     const lead = await prisma.lead.create({
       data: {
-        name,
-        email,
-        phone,
+        name: contactName || title,
+        email: contactEmail,
+        phone: description || '',
         status: status || 'NEW',
         operatorId: operatorId || null,
       },
@@ -84,7 +97,17 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ lead }, { status: 201 })
+    return NextResponse.json({
+      id: lead.id,
+      title: lead.name,
+      description: lead.phone || '',
+      status: lead.status,
+      contactName: lead.name,
+      contactEmail: lead.email,
+      assignedToId: lead.operatorId,
+      createdAt: lead.createdAt.toISOString(),
+      updatedAt: lead.updatedAt.toISOString(),
+    }, { status: 201 })
   } catch (error) {
     console.error('[LEADS] Create error:', error)
     return NextResponse.json({ error: 'Failed to create lead' }, { status: 500 })

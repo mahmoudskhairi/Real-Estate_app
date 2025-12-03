@@ -48,7 +48,17 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json({ clients })
+    // Map to include user data directly in client object
+    const clientsWithUserData = clients.map(client => ({
+      id: client.id,
+      name: client.user.name,
+      email: client.user.email,
+      phone: client.user.phone || '',
+      createdAt: client.createdAt.toISOString(),
+      userId: client.userId,
+    }))
+
+    return NextResponse.json(clientsWithUserData)
   } catch (error) {
     console.error('[CLIENTS] List error:', error)
     return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 })
@@ -65,24 +75,49 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { userId } = body
+    const { name, email, phone, password } = body
 
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+    if (!name || !email) {
+      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
     }
 
+    // First create the user
+    const bcrypt = require('bcryptjs')
+    const hashedPassword = await bcrypt.hash(password || 'client123', 10)
+    
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        phone: phone || '',
+        password: hashedPassword,
+        role: 'CLIENT',
+      }
+    })
+
+    // Then create the client linked to the user
     const client = await prisma.client.create({
-      data: { userId },
+      data: { userId: user.id },
       include: {
         user: {
-          select: { id: true, name: true, email: true }
+          select: { id: true, name: true, email: true, phone: true }
         }
       }
     })
 
-    return NextResponse.json({ client }, { status: 201 })
-  } catch (error) {
+    return NextResponse.json({
+      id: client.id,
+      name: client.user.name,
+      email: client.user.email,
+      phone: client.user.phone || '',
+      createdAt: client.createdAt.toISOString(),
+      userId: client.userId,
+    }, { status: 201 })
+  } catch (error: any) {
     console.error('[CLIENTS] Create error:', error)
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: 'Email already exists' }, { status: 400 })
+    }
     return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
   }
 }

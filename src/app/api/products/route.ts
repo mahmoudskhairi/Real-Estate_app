@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' }
     })
 
-    return NextResponse.json({ products })
+    // Return array directly
+    return NextResponse.json(products)
   } catch (error) {
     console.error('[PRODUCTS] List error:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
@@ -41,22 +42,25 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, type, price, metadata } = body
+    const { name, description, category, price, metadata } = body
 
-    if (!name || !type || !price) {
-      return NextResponse.json({ error: 'Name, type, and price are required' }, { status: 400 })
+    if (!name || !price) {
+      return NextResponse.json({ error: 'Name and price are required' }, { status: 400 })
     }
 
     const product = await prisma.product.create({
       data: {
         name,
-        type,
-        price,
-        metadata: metadata || {},
+        type: category || 'Real Estate',
+        price: parseFloat(price),
+        metadata: {
+          ...metadata,
+          description: description || '',
+        },
       }
     })
 
-    return NextResponse.json({ product }, { status: 201 })
+    return NextResponse.json(product, { status: 201 })
   } catch (error) {
     console.error('[PRODUCTS] Create error:', error)
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
