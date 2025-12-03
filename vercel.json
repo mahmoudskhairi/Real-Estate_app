@@ -1,14 +1,5 @@
 {
   "framework": "nextjs",
   "regions": ["iad1"],
-  "buildCommand": "prisma generate && prisma db push --skip-generate && next build",
-  "env": {
-    "PRISMA_CLIENT_ENGINE_TYPE": "binary"
-  },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ]
+  "buildCommand": "prisma generate && prisma db push --skip-generate && npm run db:seed && next build"
 }
