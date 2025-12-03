@@ -50,9 +50,13 @@ export default function SettingsPage() {
 
   const fetchUserData = async () => {
     try {
+      console.log('Fetching user data from /api/auth/me');
       const response = await fetch('/api/auth/me');
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('User data received:', data);
         setUser(data);
         setProfileData({
           name: data.name || "",
@@ -68,10 +72,14 @@ export default function SettingsPage() {
         setTheme(userTheme);
         document.documentElement.classList.remove('dark', 'light');
         document.documentElement.classList.add(userTheme);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to fetch user:', response.status, errorData);
+        toast.error('Failed to load user: ' + (errorData.error || 'Unauthorized'));
       }
     } catch (error) {
       console.error('Error fetching user:', error);
-      toast.error('Failed to load user data');
+      toast.error('Failed to load user data: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }

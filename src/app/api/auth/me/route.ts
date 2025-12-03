@@ -20,7 +20,12 @@ export async function GET(request: NextRequest) {
         id: true,
         email: true,
         name: true,
+        phone: true,
         role: true,
+        emailNotifications: true,
+        pushNotifications: true,
+        smsNotifications: true,
+        theme: true,
         createdAt: true,
       }
     })
@@ -29,7 +34,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ user })
+    return NextResponse.json(user)
   } catch (error) {
     console.error('[AUTH] Me error:', error)
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 })

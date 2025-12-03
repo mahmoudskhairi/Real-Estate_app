@@ -47,7 +47,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/users/[id] - Update user (ADMIN only)
+// PATCH /api/users/[id] - Update user profile
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -55,18 +55,38 @@ export async function PATCH(
   try {
     const currentUser = await verifyAuth(request)
     
+    // Users can only update their own profile unless they're admin
     if (currentUser.role !== 'ADMIN' && currentUser.id !== params.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      return NextResponse.json({ error: 'Forbidden: You can only update your own profile' }, { status: 403 })
     }
 
     const body = await request.json()
-    const { email, password, name, role } = body
+    console.log('[USERS] Update request for user:', params.id, 'Data:', body)
+    
+    const { 
+      email, 
+      password, 
+      name, 
+      phone,
+      role, 
+      emailNotifications, 
+      pushNotifications, 
+      smsNotifications, 
+      theme 
+    } = body
 
     const updateData: any = {}
-    if (email) updateData.email = email
-    if (name) updateData.name = name
+    if (email !== undefined) updateData.email = email
+    if (name !== undefined) updateData.name = name
+    if (phone !== undefined) updateData.phone = phone
     if (password) updateData.password = await bcrypt.hash(password, 10)
     if (role && currentUser.role === 'ADMIN') updateData.role = role
+    if (emailNotifications !== undefined) updateData.emailNotifications = emailNotifications
+    if (pushNotifications !== undefined) updateData.pushNotifications = pushNotifications
+    if (smsNotifications !== undefined) updateData.smsNotifications = smsNotifications
+    if (theme !== undefined) updateData.theme = theme
+
+    console.log('[USERS] Updating with data:', updateData)
 
     const user = await prisma.user.update({
       where: { id: params.id },
@@ -75,15 +95,24 @@ export async function PATCH(
         id: true,
         email: true,
         name: true,
+        phone: true,
         role: true,
+        emailNotifications: true,
+        pushNotifications: true,
+        smsNotifications: true,
+        theme: true,
         updatedAt: true,
       }
     })
 
-    return NextResponse.json({ user })
+    console.log('[USERS] Update successful:', user)
+    return NextResponse.json(user)
   } catch (error) {
     console.error('[USERS] Update error:', error)
-    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to update user',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
