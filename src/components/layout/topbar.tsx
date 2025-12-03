@@ -52,8 +52,22 @@ export function Topbar() {
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 hover:ring-2 hover:ring-indigo-400 transition-all cursor-pointer"
-          />
+            className="h-10 w-10 rounded-full overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-all cursor-pointer bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center shadow-md"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="1.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="h-6 w-6 text-indigo-600 dark:text-indigo-400"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </button>
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-xl z-50 dark:border-slate-800 dark:bg-slate-950">
               <div className="py-1">

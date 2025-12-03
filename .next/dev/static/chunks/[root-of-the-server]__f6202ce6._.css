@@ -3076,6 +3076,12 @@ body {
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
+:is(.dark .dark\:from-slate-800) {
+  --tw-gradient-from: #1e293b var(--tw-gradient-from-position);
+  --tw-gradient-to: #1e293b00 var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
 :is(.dark .dark\:via-black) {
   --tw-gradient-to: #0000 var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), #000 var(--tw-gradient-via-position), var(--tw-gradient-to);
@@ -3104,6 +3110,10 @@ body {
 
 :is(.dark .dark\:to-cyan-500) {
   --tw-gradient-to: #06b6d4 var(--tw-gradient-to-position);
+}
+
+:is(.dark .dark\:to-slate-700) {
+  --tw-gradient-to: #334155 var(--tw-gradient-to-position);
 }
 
 :is(.dark .dark\:font-medium) {
