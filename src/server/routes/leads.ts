@@ -69,6 +69,8 @@ leads.patch('/:id/status', zValidator('json', z.object({ status: z.enum(['NEW', 
 leads.post('/:id/convert', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), async (c) => {
   const leadId = c.req.param('id');
   const currentUser = c.get('user');
+  
+  console.log('[Leads] Convert endpoint hit for leadId:', leadId, 'currentUser:', currentUser?.email);
 
   try {
     // 1. Find the lead
@@ -77,10 +79,14 @@ leads.post('/:id/convert', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), 
     });
 
     if (!lead) {
+      console.log('[Leads] Lead not found:', leadId);
       return c.json({ message: 'Lead not found' }, 404);
     }
 
+    console.log('[Leads] Lead found:', lead.name, 'status:', lead.status);
+
     if (lead.status !== 'WON') {
+      console.log('[Leads] Lead status is not WON:', lead.status);
       return c.json({ message: 'Only "WON" leads can be converted' }, 400);
     }
 
@@ -89,9 +95,10 @@ leads.post('/:id/convert', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), 
       where: { email: lead.email },
     });
 
+    console.log('[Leads] User lookup result:', user?.email || 'not found');
+
     // 3. If user doesn't exist, create a new one
     if (!user) {
-      // Generate a random password (or handle this differently)
       const password = Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -105,7 +112,9 @@ leads.post('/:id/convert', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), 
         },
       });
       
-      console.log(`New user created from lead. Email: ${user.email}, Temp Password: ${password}`);
+      console.log('[Leads] New user created:', user.email, 'id:', user.id, 'tempPassword:', password);
+    } else {
+      console.log('[Leads] Using existing user:', user.email, 'id:', user.id);
     }
 
     // 4. Check if a client profile already exists for this user
@@ -113,26 +122,34 @@ leads.post('/:id/convert', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), 
         where: { userId: user.id },
     });
 
+    console.log('[Leads] Existing client check:', existingClient?.id || 'none found');
+
     // 5. If not, create a new client profile
     if (!existingClient) {
-        await prisma.client.create({
+        const newClient = await prisma.client.create({
             data: {
                 userId: user.id,
-                operatorId: lead.operatorId, // Assign the lead's operator to the new client
+                operatorId: lead.operatorId,
             },
         });
+        console.log('[Leads] New client created:', newClient.id, 'userId:', newClient.userId);
+    } else {
+      console.log('[Leads] Client already exists, skipping creation');
     }
 
-    // 6. Optionally, delete the lead after conversion
+    // 6. Delete the lead after conversion
     await prisma.lead.delete({
       where: { id: leadId },
     });
+    
+    console.log('[Leads] Lead deleted:', leadId);
 
+    console.log('[Leads] Conversion complete for lead:', lead.name, 'userId:', user.id);
     return c.json({ message: 'Lead converted to client successfully', userId: user.id }, 200);
 
   } catch (error) {
-    console.error('Error converting lead:', error);
-    return c.json({ message: 'Internal server error' }, 500);
+    console.error('[Leads] Error converting lead:', error);
+    return c.json({ message: 'Internal server error: ' + String(error) }, 500);
   }
 });
 
