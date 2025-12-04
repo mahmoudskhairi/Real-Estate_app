@@ -55,6 +55,7 @@ model User {
   supervisedUsers   User[]    @relation("Supervision")
   assignedLeads     Lead[]    @relation("OperatorLeads")
   assignedClaims    Claim[]   @relation("OperatorClaims")
+  assignedClients   Client[]  @relation("ClientOperator")
   createdComments   Comment[]
   activityLogs      ActivityLog[]
   clientProfile     Client?
@@ -103,6 +104,8 @@ model Client {
   id          String   @id @default(cuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id])
+  operatorId  String?
+  operator    User?    @relation("ClientOperator", fields: [operatorId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

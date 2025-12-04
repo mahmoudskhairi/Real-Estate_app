@@ -17,6 +17,7 @@ const createUserSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['ADMIN', 'SUPERVISOR', 'OPERATOR', 'CLIENT']),
   supervisorId: z.string().optional(),
+  operatorId: z.string().optional(),
 })
 
 // Helper function to check if user can create specific role
@@ -36,15 +37,20 @@ function canCreateRole(currentUserRole: string, targetRole: string): boolean {
 }
 
 // Helper function to filter users based on current user's role
-function filterUsersByRole(users: any[], currentUserRole: string, currentUserId: string) {
-  switch (currentUserRole) {
+function filterUsersByRole(users: any[], currentUser: any, operatorsOfSupervisor: any[]) {
+  switch (currentUser.role) {
     case 'ADMIN':
       return users; // Can see all users
     case 'SUPERVISOR':
-      // Can see their assigned operators and all clients
-      return users.filter(u => (u.role === 'OPERATOR' && u.supervisorId === currentUserId) || u.role === 'CLIENT');
+      // Can see their assigned operators and clients of those operators
+      const operatorIds = operatorsOfSupervisor.map(op => op.id);
+      return users.filter(u => 
+        (u.role === 'OPERATOR' && u.supervisorId === currentUser.id) || 
+        (u.role === 'CLIENT' && u.clientProfile && operatorIds.includes(u.clientProfile.operatorId))
+      );
     case 'OPERATOR':
-      return users.filter(u => u.role === 'CLIENT'); // Can only see clients
+       // Can only see clients assigned to them
+      return users.filter(u => u.role === 'CLIENT' && u.clientProfile && u.clientProfile.operatorId === currentUser.id);
     case 'CLIENT':
       return []; // Can't see any other users
     default:
@@ -64,6 +70,14 @@ users.get('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), async (c) =>
       whereClause.role = role.toUpperCase();
     }
     
+    let operatorsOfSupervisor: any[] = [];
+    if (currentUser.role === 'SUPERVISOR') {
+        operatorsOfSupervisor = await prisma.user.findMany({
+            where: { supervisorId: currentUser.id, role: 'OPERATOR' },
+            select: { id: true }
+        });
+    }
+
     // Get all users
     const allUsers = await prisma.user.findMany({
       where: whereClause,
@@ -76,12 +90,24 @@ users.get('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), async (c) =>
         createdAt: true,
         updatedAt: true,
         supervisorId: true,
+        supervisor: { select: { name: true } },
+        clientProfile: {
+          select: {
+            operatorId: true,
+            operator: { select: { name: true } }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' },
     })
+
+    const usersWithOperator = allUsers.map(u => ({
+      ...u,
+      operator: u.clientProfile?.operator
+    }));
     
     // Filter based on current user's role
-    const filteredUsers = filterUsersByRole(allUsers, currentUser.role, currentUser.id)
+    const filteredUsers = filterUsersByRole(usersWithOperator, currentUser, operatorsOfSupervisor)
     
     return c.json(filteredUsers)
   } catch (error) {
@@ -94,7 +120,7 @@ users.get('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), async (c) =>
 users.post('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), zValidator('json', createUserSchema), async (c) => {
   try {
     const currentUser = c.get('user')
-    const { name, email, phone, password, role, supervisorId } = c.req.valid('json')
+    const { name, email, phone, password, role, supervisorId, operatorId } = c.req.valid('json')
     
     // Check if current user can create this role
     if (!canCreateRole(currentUser.role, role)) {
@@ -105,6 +131,10 @@ users.post('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), zValidator(
 
     if (supervisorId && !['ADMIN', 'SUPERVISOR'].includes(currentUser.role)) {
         return c.json({ error: 'You do not have permission to assign a supervisor.' }, 403);
+    }
+
+    if (operatorId && !['ADMIN', 'SUPERVISOR'].includes(currentUser.role)) {
+        return c.json({ error: 'You do not have permission to assign an operator to a client.' }, 403);
     }
     
     // Check if user with this email already exists
@@ -144,6 +174,7 @@ users.post('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), zValidator(
       await prisma.client.create({
         data: {
           userId: newUser.id,
+          operatorId: operatorId || null,
         },
       })
     }

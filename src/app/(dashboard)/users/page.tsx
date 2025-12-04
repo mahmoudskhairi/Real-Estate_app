@@ -40,12 +40,15 @@ interface User {
   phone?: string;
   role: "ADMIN" | "SUPERVISOR" | "OPERATOR" | "CLIENT";
   createdAt: string;
+  supervisor?: { name: string };
+  operator?: { name: string };
 }
 
 export default function UsersPage() {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [supervisors, setSupervisors] = useState<User[]>([]);
+  const [operators, setOperators] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
@@ -54,6 +57,7 @@ export default function UsersPage() {
     password: "",
     role: "" as "SUPERVISOR" | "OPERATOR" | "CLIENT" | "",
     supervisorId: "",
+    operatorId: "",
   });
   const [phoneError, setPhoneError] = useState("");
   const { user } = useAuth();
@@ -109,10 +113,36 @@ export default function UsersPage() {
     }
   };
 
+  const fetchOperators = async () => {
+    try {
+      const response = await fetch('/api/users?role=OPERATOR');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setOperators(data);
+        } else {
+          console.error('Invalid data format for operators:', data);
+          setOperators([]);
+        }
+      } else {
+        console.error('Failed to load operators');
+        setOperators([]);
+      }
+    } catch (error) {
+      console.error('Error fetching operators:', error);
+      setOperators([]);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
-    if (user && hasPermission(user.role, 'canAssignSupervisor')) {
-        fetchSupervisors();
+    if (user) {
+        if (hasPermission(user.role, 'canAssignSupervisor')) {
+            fetchSupervisors();
+        }
+        if (hasPermission(user.role, 'canAssignOperatorToClient')) {
+            fetchOperators();
+        }
     }
   }, [user]);
 
@@ -159,6 +189,7 @@ export default function UsersPage() {
           password: formData.password.trim(),
           role: formData.role,
           supervisorId: formData.supervisorId || undefined,
+          operatorId: formData.operatorId || undefined,
         }),
       });
 
@@ -166,7 +197,7 @@ export default function UsersPage() {
         await response.json();
         toast.success(`${formData.role} user "${formData.name}" created successfully!`);
         setOpen(false);
-        setFormData({ name: "", email: "", phone: "", password: "", role: "", supervisorId: "" });
+        setFormData({ name: "", email: "", phone: "", password: "", role: "", supervisorId: "", operatorId: "" });
         fetchUsers();
       } else {
         const error = await response.json();
@@ -338,7 +369,8 @@ export default function UsersPage() {
                       onValueChange={(value) => setFormData({
                         ...formData,
                         role: value as "SUPERVISOR" | "OPERATOR" | "CLIENT",
-                        supervisorId: value !== 'OPERATOR' ? '' : formData.supervisorId
+                        supervisorId: value !== 'OPERATOR' ? '' : formData.supervisorId,
+                        operatorId: value !== 'CLIENT' ? '' : formData.operatorId,
                       })}
                     >
                       <SelectTrigger className="border-purple-300 bg-white text-purple-900 focus:border-purple-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white">
@@ -369,6 +401,24 @@ export default function UsersPage() {
                       </Select>
                     </div>
                   )}
+                  {user && hasPermission(user.role, 'canAssignOperatorToClient') && formData.role === 'CLIENT' && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="operator" className="text-pink-900 font-semibold dark:text-slate-200 dark:font-normal">Operator</Label>
+                      <Select
+                        value={formData.operatorId}
+                        onValueChange={(value) => setFormData({...formData, operatorId: value})}
+                      >
+                        <SelectTrigger className="border-pink-300 bg-white text-pink-900 focus:border-pink-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-white">
+                          <SelectValue placeholder="Assign an operator" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-pink-200 dark:bg-slate-950 dark:border-slate-800">
+                          {operators.map(operator => (
+                            <SelectItem key={operator.id} value={operator.id} className="text-pink-900 dark:text-white">{operator.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white dark:bg-indigo-600 dark:hover:bg-indigo-700 dark:from-transparent dark:to-transparent">
@@ -387,6 +437,7 @@ export default function UsersPage() {
             <TableRow className="bg-indigo-50/50 dark:bg-slate-900/50">
               <TableHead className="px-6 py-4 text-left text-xs font-semibold text-indigo-800 uppercase tracking-wider dark:text-slate-300">User</TableHead>
               <TableHead className="px-6 py-4 text-left text-xs font-semibold text-indigo-800 uppercase tracking-wider dark:text-slate-300 hidden md:table-cell">Role</TableHead>
+              <TableHead className="px-6 py-4 text-left text-xs font-semibold text-indigo-800 uppercase tracking-wider dark:text-slate-300 hidden md:table-cell">Assignment</TableHead>
               <TableHead className="px-6 py-4 text-left text-xs font-semibold text-indigo-800 uppercase tracking-wider dark:text-slate-300 hidden lg:table-cell">Created At</TableHead>
               <TableHead className="px-6 py-4 text-right text-xs font-semibold text-indigo-800 uppercase tracking-wider dark:text-slate-300">Actions</TableHead>
             </TableRow>
@@ -398,22 +449,34 @@ export default function UsersPage() {
                   <TableCell className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full">
-                        <span className="text-indigo-700 font-bold">{user.name?.charAt(0).toUpperCase()}</span>
+                        <UserPlus className="h-5 w-5 text-indigo-600" />
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-indigo-900 dark:text-white">{user.name}</div>
-                        <div className="text-sm text-indigo-600 dark:text-slate-400 flex items-center mt-1">
-                          <Mail className="h-3 w-3 mr-1.5" />
+                        <div className="text-sm text-indigo-600 dark:text-slate-400 flex items-center">
+                          <Mail className="mr-1.5 h-3 w-3" />
                           {user.email}
                         </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleColor(user.role)}`}>
-                      <Shield className="h-3 w-3 mr-1.5" />
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                      <Shield className="mr-1.5 h-3 w-3" />
                       {user.role}
                     </span>
+                  </TableCell>
+                  <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-indigo-700 dark:text-slate-400 hidden md:table-cell">
+                    {user.role === 'OPERATOR' && user.supervisor && (
+                      <div className="text-xs">
+                        <span className="font-semibold text-purple-800 dark:text-purple-300">Supervisor:</span> {user.supervisor.name}
+                      </div>
+                    )}
+                    {user.role === 'CLIENT' && user.operator && (
+                      <div className="text-xs">
+                        <span className="font-semibold text-blue-800 dark:text-blue-300">Operator:</span> {user.operator.name}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-indigo-700 dark:text-slate-400 hidden lg:table-cell">
                     {formatDate(user.createdAt)}
