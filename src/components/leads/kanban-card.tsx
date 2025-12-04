@@ -2,14 +2,32 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Lead } from "@prisma/client";
+type LeadStatus =
+  | "NEW"
+  | "CONTACTED"
+  | "QUALIFIED"
+  | "PROPOSAL"
+  | "NEGOTIATION"
+  | "WON"
+  | "LOST";
+
+type LeadItem = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: LeadStatus;
+  operatorId: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { UserPlus } from "lucide-react";
 
 interface Props {
-  lead: Lead;
+  lead: LeadItem;
   onConvert: (leadId: string) => void;
 }
 
