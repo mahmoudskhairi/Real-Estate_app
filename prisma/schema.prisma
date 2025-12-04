@@ -51,7 +51,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  supervisor        User?     @relation("Supervision", fields: [supervisorId], references: [id])
+  supervisor        User?     @relation("Supervision", fields: [supervisorId], references: [id], onDelete: SetNull)
   supervisedUsers   User[]    @relation("Supervision")
   assignedLeads     Lead[]    @relation("OperatorLeads")
   assignedClaims    Claim[]   @relation("OperatorClaims")
@@ -85,7 +85,7 @@ model Lead {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  operator    User?       @relation("OperatorLeads", fields: [operatorId], references: [id])
+  operator    User?       @relation("OperatorLeads", fields: [operatorId], references: [id], onDelete: SetNull)
   products    LeadProduct[]
   comments    Comment[]
   activityLogs ActivityLog[]
@@ -103,9 +103,9 @@ model LeadProduct {
 model Client {
   id          String   @id @default(cuid())
   userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   operatorId  String?
-  operator    User?    @relation("ClientOperator", fields: [operatorId], references: [id])
+  operator    User?    @relation("ClientOperator", fields: [operatorId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -132,8 +132,8 @@ model Claim {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  client      Client      @relation(fields: [clientId], references: [id])
-  operator    User?       @relation("OperatorClaims", fields: [operatorId], references: [id])
+  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  operator    User?       @relation("OperatorClaims", fields: [operatorId], references: [id], onDelete: SetNull)
   attachments Attachment[]
   comments    Comment[]
   activityLogs ActivityLog[]
