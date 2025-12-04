@@ -116,6 +116,34 @@ export function KanbanBoard({ leads, onConvertLead, onUpdateLeads }: KanbanBoard
       
       if (response.ok) {
         toast.success(`Lead moved to ${defaultCols.find(col => col.id === overContainer)?.title}`);
+        
+        // If moved to WON, auto-convert to client
+        if (overContainer === 'WON') {
+          console.log('[Kanban] Auto-converting lead to client:', lead.id);
+          try {
+            const convertResponse = await fetch(`/api/leads/${lead.id}/convert`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            
+            if (convertResponse.ok) {
+              const convertData = await convertResponse.json();
+              console.log('[Kanban] Auto-conversion successful:', convertData);
+              toast.success(`"${lead.name}" automatically converted to client!`);
+              onConvertLead(lead.id);
+              
+              // Remove from leads list
+              onUpdateLeads(prev => prev.filter(item => item.id !== lead.id));
+            } else {
+              const error = await convertResponse.json().catch(() => ({ message: 'Failed to convert' }));
+              console.error('[Kanban] Auto-conversion failed:', error);
+              toast.error(`Conversion failed: ${error.message || 'Unknown error'}`);
+            }
+          } catch (error) {
+            console.error('[Kanban] Auto-conversion error:', error);
+            toast.error('An error occurred during auto-conversion');
+          }
+        }
       } else {
         // Revert on error
         onUpdateLeads(leads);
