@@ -163,7 +163,7 @@ export default function UsersPage() {
       });
 
       if (response.ok) {
-        const newUser = await response.json();
+        await response.json();
         toast.success(`${formData.role} user "${formData.name}" created successfully!`);
         setOpen(false);
         setFormData({ name: "", email: "", phone: "", password: "", role: "", supervisorId: "" });
@@ -185,7 +185,7 @@ export default function UsersPage() {
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete user \"${userName}\"? This action cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
       return;
     }
 
@@ -195,7 +195,7 @@ export default function UsersPage() {
       });
 
       if (response.ok) {
-        toast.success(`User \"${userName}\" deleted successfully`);
+        toast.success(`User "${userName}" deleted successfully`);
         fetchUsers();
       } else {
         const error = await response.json();
