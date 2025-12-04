@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 
 interface Props {
   lead: LeadItem;
-  onConvert: (leadId: string) => void;
+  onConvert: (leadId: string, leadName?: string) => void;
 }
 
 export function KanbanCard({ lead, onConvert }: Props) {
@@ -61,7 +61,7 @@ export function KanbanCard({ lead, onConvert }: Props) {
           const data = await response.json();
           console.log('[Kanban] Conversion successful:', data);
           toast.success(`Lead "${lead.name}" converted to client successfully!`);
-          onConvert(lead.id);
+          onConvert(lead.id, lead.name);
           console.log('[Kanban] Navigating to /clients');
           setTimeout(() => router.push('/clients'), 1000);
         } else {

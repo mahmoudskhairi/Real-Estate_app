@@ -50,7 +50,7 @@ const defaultCols: { id: LeadStatus; title: string }[] = [
 
 interface KanbanBoardProps {
   leads: LeadItem[];
-  onConvertLead: (convertedLeadId: string) => void;
+  onConvertLead: (convertedLeadId: string, leadName?: string) => void;
   onUpdateLeads: (updatedLeads: LeadItem[] | ((prev: LeadItem[]) => LeadItem[])) => void;
 }
 
@@ -119,30 +119,35 @@ export function KanbanBoard({ leads, onConvertLead, onUpdateLeads }: KanbanBoard
         
         // If moved to WON, auto-convert to client
         if (overContainer === 'WON') {
-          console.log('[Kanban] Auto-converting lead to client:', lead.id);
-          try {
-            const convertResponse = await fetch(`/api/leads/${lead.id}/convert`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-            });
-            
-            if (convertResponse.ok) {
-              const convertData = await convertResponse.json();
-              console.log('[Kanban] Auto-conversion successful:', convertData);
-              toast.success(`"${lead.name}" automatically converted to client!`);
-              onConvertLead(lead.id);
+          console.log('[Kanban] Auto-converting lead to client:', lead.id, lead.name);
+          
+          // Wait a moment to ensure status update is processed
+          setTimeout(async () => {
+            try {
+              const convertResponse = await fetch(`/api/leads/${lead.id}/convert`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+              });
               
-              // Remove from leads list
-              onUpdateLeads(prev => prev.filter(item => item.id !== lead.id));
-            } else {
-              const error = await convertResponse.json().catch(() => ({ message: 'Failed to convert' }));
-              console.error('[Kanban] Auto-conversion failed:', error);
-              toast.error(`Conversion failed: ${error.message || 'Unknown error'}`);
+              console.log('[Kanban] Convert response status:', convertResponse.status);
+              
+              if (convertResponse.ok) {
+                const convertData = await convertResponse.json();
+                console.log('[Kanban] Auto-conversion successful:', convertData);
+                onConvertLead(lead.id, lead.name);
+                
+                // Remove from leads list
+                onUpdateLeads(prev => prev.filter(item => item.id !== lead.id));
+              } else {
+                const error = await convertResponse.json().catch(() => ({ message: 'Failed to convert' }));
+                console.error('[Kanban] Auto-conversion failed:', convertResponse.status, error);
+                toast.error(`Conversion failed: ${error.message || 'Unknown error'}`);
+              }
+            } catch (error) {
+              console.error('[Kanban] Auto-conversion error:', error);
+              toast.error('An error occurred during auto-conversion');
             }
-          } catch (error) {
-            console.error('[Kanban] Auto-conversion error:', error);
-            toast.error('An error occurred during auto-conversion');
-          }
+          }, 500);
         }
       } else {
         // Revert on error

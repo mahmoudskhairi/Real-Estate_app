@@ -12,7 +12,7 @@ interface Props {
   id: string;
   title: string;
   items: Lead[];
-  onConvert: (leadId: string) => void;
+  onConvert: (leadId: string, leadName?: string) => void;
 }
 
 export function KanbanColumn({ id, title, items, onConvert }: Props) {

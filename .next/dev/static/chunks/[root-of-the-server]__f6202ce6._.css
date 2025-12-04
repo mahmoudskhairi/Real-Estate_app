@@ -497,12 +497,16 @@ body {
   left: 50%;
 }
 
-.right-0 {
-  right: 0;
-}
-
 .right-4 {
   right: 1rem;
+}
+
+.right-6 {
+  right: 1.5rem;
+}
+
+.top-16 {
+  top: 4rem;
 }
 
 .top-2 {
@@ -531,6 +535,10 @@ body {
 
 .z-50 {
   z-index: 50;
+}
+
+.z-\[5000\] {
+  z-index: 5000;
 }
 
 .col-span-3 {
@@ -630,6 +638,10 @@ body {
 
 .block {
   display: block;
+}
+
+.inline-block {
+  display: inline-block;
 }
 
 .flex {
@@ -1036,6 +1048,10 @@ body {
 
 .whitespace-nowrap {
   white-space: nowrap;
+}
+
+.rounded {
+  border-radius: .25rem;
 }
 
 .rounded-2xl {
@@ -2371,12 +2387,6 @@ body {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.shadow-xl {
-  --tw-shadow: 0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a;
-  --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
 .shadow-indigo-500\/20 {
   --tw-shadow-color: #6366f133;
   --tw-shadow: var(--tw-shadow-colored);
@@ -2575,12 +2585,6 @@ body {
 .placeholder\:text-teal-400::placeholder {
   --tw-text-opacity: 1;
   color: rgb(45 212 191 / var(--tw-text-opacity));
-}
-
-.hover\:scale-105:hover {
-  --tw-scale-x: 1.05;
-  --tw-scale-y: 1.05;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .hover\:border-indigo-500\/50:hover {
@@ -2946,6 +2950,11 @@ body {
   cursor: grabbing;
 }
 
+.active\:bg-green-700:active {
+  --tw-bg-opacity: 1;
+  background-color: rgb(21 128 61 / var(--tw-bg-opacity));
+}
+
 .disabled\:pointer-events-none:disabled {
   pointer-events: none;
 }
@@ -3163,6 +3172,10 @@ body {
 
 :is(.dark .dark\:bg-blue-500\/10) {
   background-color: #3b82f61a;
+}
+
+:is(.dark .dark\:bg-blue-900\/30) {
+  background-color: #1e3a8a4d;
 }
 
 :is(.dark .dark\:bg-gray-500\/10) {
@@ -3449,12 +3462,6 @@ body {
 :is(.dark .dark\:placeholder\:text-slate-500)::placeholder {
   --tw-text-opacity: 1;
   color: rgb(100 116 139 / var(--tw-text-opacity));
-}
-
-:is(.dark .dark\:hover\:scale-100:hover) {
-  --tw-scale-x: 1;
-  --tw-scale-y: 1;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 :is(.dark .dark\:hover\:border-indigo-500\/50:hover) {

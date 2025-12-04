@@ -55,8 +55,11 @@ export default function LeadsPage() {
     fetchLeads(); // Refetch all leads
   };
 
-  const handleLeadConverted = (convertedLeadId: string) => {
+  const handleLeadConverted = (convertedLeadId: string, leadName?: string) => {
     setLeads(prevLeads => prevLeads.filter(lead => lead.id !== convertedLeadId));
+    if (leadName) {
+      toast.success(`Lead "${leadName}" converted to client and added to client list!`);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
