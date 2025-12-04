@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -13,26 +13,45 @@ import {
   DragOverEvent,
   DragEndEvent,
 } from "@dnd-kit/core";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./kanban-column";
 import { KanbanCard } from "./kanban-card";
 import { toast } from "@/lib/toast";
-import { Lead } from "@prisma/client";
 
-const defaultCols = [
+type LeadStatus =
+  | "NEW"
+  | "CONTACTED"
+  | "QUALIFIED"
+  | "PROPOSAL"
+  | "NEGOTIATION"
+  | "WON"
+  | "LOST";
+
+type LeadItem = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: LeadStatus;
+  operatorId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+const defaultCols: { id: LeadStatus; title: string }[] = [
   { id: "NEW", title: "New" },
   { id: "CONTACTED", title: "Contacted" },
   { id: "QUALIFIED", title: "Qualified" },
   { id: "PROPOSAL", title: "Proposal" },
   { id: "NEGOTIATION", title: "Negotiation" },
   { id: "WON", title: "Won" },
-    { id: "LOST", title: "Lost" },
+  { id: "LOST", title: "Lost" },
 ];
 
 interface KanbanBoardProps {
-  leads: Lead[];
+  leads: LeadItem[];
   onConvertLead: (convertedLeadId: string) => void;
-  onUpdateLeads: (updatedLeads: Lead[]) => void;
+  onUpdateLeads: (updatedLeads: LeadItem[] | ((prev: LeadItem[]) => LeadItem[])) => void;
 }
 
 export function KanbanBoard({ leads, onConvertLead, onUpdateLeads }: KanbanBoardProps) {
@@ -49,10 +68,10 @@ export function KanbanBoard({ leads, onConvertLead, onUpdateLeads }: KanbanBoard
     setActiveId(event.active.id as string);
   }
 
-  function findContainer(id: string) {
+  function findContainer(id: string): LeadStatus | undefined {
     // Check if it's a column ID
     if (defaultCols.find(col => col.id === id)) {
-      return id;
+      return id as LeadStatus;
     }
     
     // Otherwise, find which column contains this lead
@@ -120,43 +139,15 @@ export function KanbanBoard({ leads, onConvertLead, onUpdateLeads }: KanbanBoard
     const activeContainer = findContainer(activeId);
     const overContainer = findContainer(overId);
 
-    if (
-      !activeContainer ||
-      !overContainer ||
-      activeContainer === overContainer
-    ) {
+    if (!activeContainer || !overContainer || activeContainer === overContainer) {
       return;
     }
 
-    onUpdateLeads((prev) => {
-      const activeItems = prev.filter((item) => item.status === activeContainer);
-      const overItems = prev.filter((item) => item.status === overContainer);
-
-      const activeIndex = activeItems.findIndex((item) => item.id === activeId);
-      const overIndex = overItems.findIndex((item) => item.id === overId);
-
-      let newIndex;
-      if (overId in prev) {
-        newIndex = overItems.length + 1;
-      } else {
-        const isBelowOverItem =
-          over &&
-          active.rect.current.translated &&
-          active.rect.current.translated.top >
-            over.rect.top + over.rect.height;
-
-        const modifier = isBelowOverItem ? 1 : 0;
-
-        newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
-      }
-
-      return prev.map((item) => {
-        if (item.id === activeId) {
-          return { ...item, status: overContainer };
-        }
-        return item;
-      });
-    });
+    onUpdateLeads((prev) =>
+      prev.map((item) =>
+        item.id === activeId ? { ...item, status: overContainer } : item
+      )
+    );
   }
 
   const activeLead = leads.find(item => item.id === activeId);
@@ -182,168 +173,6 @@ export function KanbanBoard({ leads, onConvertLead, onUpdateLeads }: KanbanBoard
       </div>
       <DragOverlay>
         {activeLead ? <KanbanCard lead={activeLead} onConvert={onConvertLead} /> : null}
-      </DragOverlay>
-    </DndContext>
-  );
-}
-
-];
-
-export function KanbanBoard() {
-  const [items, setItems] = useState<Lead[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const fetchLeads = async () => {
-    try {
-      const response = await fetch('/api/leads');
-      if (response.ok) {
-        const data = await response.json();
-        // Validate that data is an array
-        if (Array.isArray(data)) {
-          // API returns leads with name, email, phone directly
-          const leads = data.map((item: any) => ({
-            id: item.id,
-            name: item.name,
-            email: item.email,
-            phone: item.phone || '',
-            status: item.status,
-            operatorId: item.operatorId,
-            createdAt: new Date(item.createdAt),
-            updatedAt: new Date(item.updatedAt),
-          }));
-          setItems(leads as Lead[]);
-        } else {
-          console.error('Invalid data format:', data);
-          setItems([]);
-          toast.error('Invalid data format received');
-        }
-      } else {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to load leads' }));
-        console.error('API error:', errorData);
-        setItems([]);
-        toast.error(errorData.message || 'Failed to load leads');
-      }
-    } catch (error) {
-      console.error('Error fetching leads:', error);
-      setItems([]);
-      toast.error('Error loading leads');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchLeads();
-  }, []);
-
-  const handleConvertLead = (convertedLeadId: string) => {
-    // Remove the converted lead from the board
-    setItems(prevItems => prevItems.filter(item => item.id !== convertedLeadId));
-  };
-
-  function handleDragStart(event: DragStartEvent) {
-    setActiveId(event.active.id as string);
-  }
-
-  function findContainer(id: string) {
-    // Check if it's a column ID
-    if (defaultCols.find(col => col.id === id)) {
-      return id;
-    }
-    
-    // Otherwise, find which column contains this lead
-    const lead = items.find(item => item.id === id);
-    return lead?.status;
-  }
-
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    setActiveId(null);
-    
-    if (!over) return;
-    
-    const activeId = active.id as string;
-    const overId = over.id as string;
-    
-    // Find the lead being dragged
-    const lead = items.find(item => item.id === activeId);
-    if (!lead) return;
-    
-    // Find the target container (column)
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
-    
-    if (!overContainer || activeContainer === overContainer) {
-      return; // No status change needed
-    }
-    
-    // Update optimistically
-    const updatedItems = items.map(item => 
-      item.id === lead.id ? { ...item, status: overContainer } : item
-    );
-    setItems(updatedItems);
-    
-    // Update on server
-    try {
-      const response = await fetch(`/api/leads/${lead.id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: overContainer }),
-      });
-      
-      if (response.ok) {
-        toast.success(`Lead moved to ${defaultCols.find(col => col.id === overContainer)?.title}`);
-      } else {
-        // Revert on error
-        setItems(items);
-        toast.error('Failed to update lead status');
-      }
-    } catch (error) {
-      console.error('Error updating lead:', error);
-      // Revert on error
-      setItems(items);
-      toast.error('Error updating lead');
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center text-slate-400">
-        Loading leads...
-      </div>
-    );
-  }
-
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex h-full gap-4 overflow-x-auto pb-4">
-        {defaultCols.map((col) => (
-          <KanbanColumn
-            key={col.id}
-            id={col.id}
-            title={col.title}
-            items={items.filter((i) => i.status === col.id)}
-            onConvert={handleConvertLead}
-          />
-        ))}
-      </div>
-      <DragOverlay>
-        {activeId ? (
-          <KanbanCard lead={items.find((i) => i.id === activeId)!} onConvert={handleConvertLead} />
-        ) : null}
       </DragOverlay>
     </DndContext>
   );

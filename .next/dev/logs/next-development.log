@@ -1,16 +1,12 @@
-[00:00:06.028] Server  LOG      ✓ Ready in 4.7s
-[00:00:11.946] Server  LOG      ○ Compiling / ...
-[00:01:26.374] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:01:27.535] Server  LOG      ○ Compiling /_not-found/page ...
-[00:03:54.116] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin1234"}
-[00:03:57.219] Server  LOG      ○ Compiling /api/[[...route]] ...
-[00:04:08.145] Server  LOG     <-- POST /api/auth/login
-[00:04:08.164] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
-[00:04:08.917] Server  LOG     [AUTH] User found, verifying password
-[00:04:09.248] Server  LOG     [AUTH] Login successful for: "admin@nexuserp.com"
-[00:04:09.252] Server  LOG     --> POST /api/auth/login 200 1s
-[00:04:09.395] Browser LOG     Response status: 200
-[00:04:09.395] Browser LOG     Response data: {"user":{"email":"admin@nexuserp.com","emailNotifications":true,"id":"cmioh76pj00004wdts5laqek2","name":"Admin User","phone":"+212614368799","pushNotifications":true,"role":"ADMIN","smsNotifications":true,"theme":"light"}}
-[00:04:12.327] Server  LOG      ○ Compiling /dashboard ...
-[00:16:22.745] Server  LOG      ✓ Compiled in 23.1s
-[00:17:06.071] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:03.192] Server  LOG      ✓ Ready in 2.2s
+[00:00:06.851] Server  LOG      ○ Compiling /login ...
+[00:00:26.922] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:30.187] Browser LOG     Attempting login with: {"email":"admin@nexuserp.com","password":"admin1234"}
+[00:00:33.404] Server  LOG      ○ Compiling /api/[[...route]] ...
+[00:00:36.598] Server  LOG     <-- POST /api/auth/login
+[00:00:36.617] Server  LOG     [AUTH] Login attempt for: "admin@nexuserp.com"
+[00:00:36.872] Server  LOG     [AUTH] User found, verifying password
+[00:00:37.154] Server  LOG     [AUTH] Invalid password for: "admin@nexuserp.com"
+[00:00:37.157] Server  LOG     --> POST /api/auth/login 401 550ms
+[00:00:37.270] Browser LOG     Response status: 401
+[00:00:37.271] Browser LOG     Response data: {"error":"Invalid credentials"}
