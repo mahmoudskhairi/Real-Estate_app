@@ -19,6 +19,7 @@ clients.get('/', async (c) => {
   const allClients = await prisma.client.findMany({
     include: {
       user: { select: { name: true, email: true, phone: true } },
+      operator: { select: { id: true, name: true, email: true } },
       products: { include: { product: true } },
     },
   })
@@ -29,6 +30,9 @@ clients.get('/', async (c) => {
     name: client.user.name || 'N/A',
     email: client.user.email,
     phone: client.user.phone,
+    operatorId: client.operatorId,
+    operatorName: client.operator?.name || 'Unassigned',
+    operatorEmail: client.operator?.email,
     createdAt: client.createdAt,
   }))
   

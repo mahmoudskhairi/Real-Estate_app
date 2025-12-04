@@ -29,6 +29,9 @@ interface Client {
   name: string;
   email: string;
   phone?: string;
+  operatorId?: string;
+  operatorName?: string;
+  operatorEmail?: string;
   createdAt: string;
 }
 
@@ -201,6 +204,7 @@ export default function ClientsPage() {
               <TableHead className="text-indigo-900 font-bold dark:text-slate-400 dark:font-medium">Name</TableHead>
               <TableHead className="text-purple-900 font-bold dark:text-slate-400 dark:font-medium">Email</TableHead>
               <TableHead className="text-pink-900 font-bold dark:text-slate-400 dark:font-medium">Phone</TableHead>
+              <TableHead className="text-blue-900 font-bold dark:text-slate-400 dark:font-medium">Assigned To</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -228,6 +232,15 @@ export default function ClientsPage() {
                   <TableCell className="text-purple-600 dark:text-slate-400">{client.email}</TableCell>
                   <TableCell className="text-pink-600 dark:text-slate-400">
                     {client.phone || 'N/A'}
+                  </TableCell>
+                  <TableCell className="text-blue-600 dark:text-slate-400">
+                    <span className={`inline-block px-2 py-1 rounded text-sm font-medium ${
+                      client.operatorName === 'Unassigned'
+                        ? 'bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-400'
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    }`}>
+                      {client.operatorName}
+                    </span>
                   </TableCell>
                 </TableRow>
               ))
