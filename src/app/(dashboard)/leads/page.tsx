@@ -19,8 +19,45 @@ import { toast } from "sonner";
 
 export default function LeadsPage() {
   const [open, setOpen] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [leads, setLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ title: "", description: "", contactName: "", contactEmail: "" });
+
+  const fetchLeads = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/leads');
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setLeads(data);
+        } else {
+          toast.error('Invalid data format received');
+          setLeads([]);
+        }
+      } else {
+        toast.error('Failed to load leads');
+        setLeads([]);
+      }
+    } catch (error) {
+      toast.error('Error loading leads');
+      setLeads([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const handleLeadCreated = () => {
+    fetchLeads(); // Refetch all leads
+  };
+
+  const handleLeadConverted = (convertedLeadId: string) => {
+    setLeads(prevLeads => prevLeads.filter(lead => lead.id !== convertedLeadId));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +78,7 @@ export default function LeadsPage() {
         toast.success(`Lead "${formData.title}" created successfully!`);
         setOpen(false);
         setFormData({ title: "", description: "", contactName: "", contactEmail: "" });
-        setRefreshTrigger(prev => prev + 1); // Trigger Kanban refresh
+        handleLeadCreated(); // Trigger refresh
       } else {
         const error = await response.json();
         toast.error(error.message || 'Failed to create lead');
@@ -132,7 +169,11 @@ export default function LeadsPage() {
         </Dialog>
       </div>
       <div className="flex-1 overflow-hidden">
-        <KanbanBoard key={refreshTrigger} />
+        <KanbanBoard 
+          leads={leads} 
+          onConvertLead={handleLeadConverted}
+          onUpdateLeads={setLeads}
+        />
       </div>
     </div>
   );

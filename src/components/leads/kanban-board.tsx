@@ -26,7 +26,167 @@ const defaultCols = [
   { id: "PROPOSAL", title: "Proposal" },
   { id: "NEGOTIATION", title: "Negotiation" },
   { id: "WON", title: "Won" },
-  { id: "LOST", title: "Lost" },
+    { id: "LOST", title: "Lost" },
+];
+
+interface KanbanBoardProps {
+  leads: Lead[];
+  onConvertLead: (convertedLeadId: string) => void;
+  onUpdateLeads: (updatedLeads: Lead[]) => void;
+}
+
+export function KanbanBoard({ leads, onConvertLead, onUpdateLeads }: KanbanBoardProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string);
+  }
+
+  function findContainer(id: string) {
+    // Check if it's a column ID
+    if (defaultCols.find(col => col.id === id)) {
+      return id;
+    }
+    
+    // Otherwise, find which column contains this lead
+    const lead = leads.find(item => item.id === id);
+    return lead?.status;
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    setActiveId(null);
+    
+    if (!over) return;
+    
+    const activeId = active.id as string;
+    const overId = over.id as string;
+    
+    // Find the lead being dragged
+    const lead = leads.find(item => item.id === activeId);
+    if (!lead) return;
+    
+    // Find the target container (column)
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+    
+    if (!overContainer || activeContainer === overContainer) {
+      return; // No status change needed
+    }
+    
+    // Update optimistically
+    const updatedItems = leads.map(item => 
+      item.id === lead.id ? { ...item, status: overContainer } : item
+    );
+    onUpdateLeads(updatedItems);
+    
+    // Update on server
+    try {
+      const response = await fetch(`/api/leads/${lead.id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: overContainer }),
+      });
+      
+      if (response.ok) {
+        toast.success(`Lead moved to ${defaultCols.find(col => col.id === overContainer)?.title}`);
+      } else {
+        // Revert on error
+        onUpdateLeads(leads);
+        toast.error('Failed to update lead status');
+      }
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      // Revert on error
+      onUpdateLeads(leads);
+      toast.error('An error occurred while updating lead status');
+    }
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+
+    if (
+      !activeContainer ||
+      !overContainer ||
+      activeContainer === overContainer
+    ) {
+      return;
+    }
+
+    onUpdateLeads((prev) => {
+      const activeItems = prev.filter((item) => item.status === activeContainer);
+      const overItems = prev.filter((item) => item.status === overContainer);
+
+      const activeIndex = activeItems.findIndex((item) => item.id === activeId);
+      const overIndex = overItems.findIndex((item) => item.id === overId);
+
+      let newIndex;
+      if (overId in prev) {
+        newIndex = overItems.length + 1;
+      } else {
+        const isBelowOverItem =
+          over &&
+          active.rect.current.translated &&
+          active.rect.current.translated.top >
+            over.rect.top + over.rect.height;
+
+        const modifier = isBelowOverItem ? 1 : 0;
+
+        newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+      }
+
+      return prev.map((item) => {
+        if (item.id === activeId) {
+          return { ...item, status: overContainer };
+        }
+        return item;
+      });
+    });
+  }
+
+  const activeLead = leads.find(item => item.id === activeId);
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex h-full items-start gap-4 overflow-x-auto p-4">
+        {defaultCols.map((col) => (
+          <KanbanColumn
+            key={col.id}
+            id={col.id}
+            title={col.title}
+            items={leads.filter((item) => item.status === col.id)}
+            onConvert={onConvertLead}
+          />
+        ))}
+      </div>
+      <DragOverlay>
+        {activeLead ? <KanbanCard lead={activeLead} onConvert={onConvertLead} /> : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}
+
 ];
 
 export function KanbanBoard() {
