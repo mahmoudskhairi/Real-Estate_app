@@ -37,6 +37,7 @@ export function Topbar() {
         <div className="relative w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-purple-400 dark:text-slate-500" />
           <Input
+            id="search"
             placeholder="Search..."
             className="pl-8 border-indigo-200 bg-white text-gray-900 placeholder:text-purple-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-indigo-500 dark:focus:ring-0"
           />

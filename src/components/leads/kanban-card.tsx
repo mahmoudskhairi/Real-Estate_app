@@ -105,4 +105,3 @@ export function KanbanCard({ lead, onConvert }: Props) {
     </div>
   );
 }
-}
