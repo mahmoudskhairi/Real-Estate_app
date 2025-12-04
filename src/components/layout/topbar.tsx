@@ -71,7 +71,7 @@ export function Topbar() {
             </svg>
           </button>
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-xl z-50 dark:border-slate-800 dark:bg-slate-950">
+            <div className="fixed right-6 top-16 w-56 rounded-lg border border-gray-200 bg-white shadow-xl z-[1000] dark:border-slate-800 dark:bg-slate-950">
               <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-800">
                 <p className="text-sm font-semibold text-gray-900 dark:text-slate-200">
                   {user?.name || user?.email}
