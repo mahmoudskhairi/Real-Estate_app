@@ -210,13 +210,13 @@ export default function ClientsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-indigo-600 py-8 dark:text-slate-400">
+                <TableCell colSpan={4} className="text-center text-indigo-600 py-8 dark:text-slate-400">
                   Loading clients...
                 </TableCell>
               </TableRow>
             ) : clients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-purple-600 py-8 dark:text-slate-400">
+                <TableCell colSpan={4} className="text-center text-purple-600 py-8 dark:text-slate-400">
                   No clients found. Add your first client!
                 </TableCell>
               </TableRow>
