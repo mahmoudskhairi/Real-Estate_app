@@ -118,7 +118,7 @@ leads.post('/:id/convert', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), 
         await prisma.client.create({
             data: {
                 userId: user.id,
-                // You can add more fields here if needed, e.g., from lead metadata
+                operatorId: lead.operatorId, // Assign the lead's operator to the new client
             },
         });
     }
