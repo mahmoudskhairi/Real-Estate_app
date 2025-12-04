@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   lead: LeadItem;
@@ -34,6 +35,7 @@ interface Props {
 export function KanbanCard({ lead, onConvert }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: lead.id });
+  const router = useRouter();
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -49,11 +51,13 @@ export function KanbanCard({ lead, onConvert }: Props) {
         });
 
         if (response.ok) {
-          await response.json();
+          const data = await response.json();
           toast.success(`Lead "${lead.name}" converted to client successfully!`);
-          onConvert(lead.id); // Notify parent to refetch or update state
+          onConvert(lead.id); // Notify parent to update state
+          // Navigate to clients to verify conversion
+          router.push('/clients');
         } else {
-          const error = await response.json();
+          const error = await response.json().catch(() => ({ message: 'Failed to convert lead.' }));
           toast.error(error.message || 'Failed to convert lead.');
         }
       } catch (error) {
