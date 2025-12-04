@@ -16,6 +16,7 @@ const createUserSchema = z.object({
   phone: z.string().optional(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['ADMIN', 'SUPERVISOR', 'OPERATOR', 'CLIENT']),
+  supervisorId: z.string().optional(),
 })
 
 // Helper function to check if user can create specific role
@@ -35,12 +36,13 @@ function canCreateRole(currentUserRole: string, targetRole: string): boolean {
 }
 
 // Helper function to filter users based on current user's role
-function filterUsersByRole(users: any[], currentUserRole: string) {
+function filterUsersByRole(users: any[], currentUserRole: string, currentUserId: string) {
   switch (currentUserRole) {
     case 'ADMIN':
       return users; // Can see all users
     case 'SUPERVISOR':
-      return users.filter(u => ['OPERATOR', 'CLIENT'].includes(u.role)); // Can't see other supervisors or admins
+      // Can see their assigned operators and all clients
+      return users.filter(u => (u.role === 'OPERATOR' && u.supervisorId === currentUserId) || u.role === 'CLIENT');
     case 'OPERATOR':
       return users.filter(u => u.role === 'CLIENT'); // Can only see clients
     case 'CLIENT':
@@ -54,9 +56,17 @@ function filterUsersByRole(users: any[], currentUserRole: string) {
 users.get('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), async (c) => {
   try {
     const currentUser = c.get('user')
+    const { role } = c.req.query()
+
+    let whereClause: any = {};
+
+    if (role) {
+      whereClause.role = role.toUpperCase();
+    }
     
     // Get all users
     const allUsers = await prisma.user.findMany({
+      where: whereClause,
       select: {
         id: true,
         name: true,
@@ -65,12 +75,13 @@ users.get('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), async (c) =>
         role: true,
         createdAt: true,
         updatedAt: true,
+        supervisorId: true,
       },
       orderBy: { createdAt: 'desc' },
     })
     
     // Filter based on current user's role
-    const filteredUsers = filterUsersByRole(allUsers, currentUser.role)
+    const filteredUsers = filterUsersByRole(allUsers, currentUser.role, currentUser.id)
     
     return c.json(filteredUsers)
   } catch (error) {
@@ -83,13 +94,17 @@ users.get('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), async (c) =>
 users.post('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), zValidator('json', createUserSchema), async (c) => {
   try {
     const currentUser = c.get('user')
-    const { name, email, phone, password, role } = c.req.valid('json')
+    const { name, email, phone, password, role, supervisorId } = c.req.valid('json')
     
     // Check if current user can create this role
     if (!canCreateRole(currentUser.role, role)) {
       return c.json({ 
         error: `You don't have permission to create ${role} users` 
       }, 403)
+    }
+
+    if (supervisorId && !['ADMIN', 'SUPERVISOR'].includes(currentUser.role)) {
+        return c.json({ error: 'You do not have permission to assign a supervisor.' }, 403);
     }
     
     // Check if user with this email already exists
@@ -112,6 +127,7 @@ users.post('/', roleMiddleware(['ADMIN', 'SUPERVISOR', 'OPERATOR']), zValidator(
         phone: phone || null,
         password: hashedPassword,
         role,
+        supervisorId: supervisorId || null,
       },
       select: {
         id: true,

@@ -22,6 +22,7 @@ export const rolePermissions = {
     canManageUsers: true,
     canDeleteUsers: true,
     canEditAllClaims: true,
+    canAssignSupervisor: true,
   },
   SUPERVISOR: {
     canAccessDashboard: true,
@@ -34,6 +35,7 @@ export const rolePermissions = {
     canManageUsers: true,
     canDeleteUsers: false,
     canEditAllClaims: true,
+    canAssignSupervisor: true,
   },
   OPERATOR: {
     canAccessDashboard: true,
@@ -46,6 +48,7 @@ export const rolePermissions = {
     canManageUsers: true,
     canDeleteUsers: false,
     canEditAllClaims: false,
+    canAssignSupervisor: false,
   },
   CLIENT: {
     canAccessDashboard: false,
@@ -58,6 +61,7 @@ export const rolePermissions = {
     canManageUsers: false,
     canDeleteUsers: false,
     canEditAllClaims: false,
+    canAssignSupervisor: false,
   },
 };
 

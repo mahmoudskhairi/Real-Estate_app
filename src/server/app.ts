@@ -10,6 +10,7 @@ import leads from './routes/leads'
 import products from './routes/products'
 import clients from './routes/clients'
 import claims from './routes/claims'
+import analytics from './routes/analytics'
 import prisma from './db'
 
 const app = new Hono().basePath('/api')
@@ -57,5 +58,10 @@ app.route('/leads', leads)
 app.route('/products', products)
 app.route('/clients', clients)
 app.route('/claims', claims)
+app.route('/analytics', analytics)
+
+app.get('/', (c) => {
+  return c.text('Real Estate ERP API')
+})
 
 export default app

@@ -16,7 +16,7 @@ import {
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "./kanban-column";
 import { KanbanCard } from "./kanban-card";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Lead } from "@prisma/client";
 
 const defaultCols = [
@@ -83,6 +83,11 @@ export function KanbanBoard() {
   useEffect(() => {
     fetchLeads();
   }, []);
+
+  const handleConvertLead = (convertedLeadId: string) => {
+    // Remove the converted lead from the board
+    setItems(prevItems => prevItems.filter(item => item.id !== convertedLeadId));
+  };
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
@@ -171,12 +176,13 @@ export function KanbanBoard() {
             id={col.id}
             title={col.title}
             items={items.filter((i) => i.status === col.id)}
+            onConvert={handleConvertLead}
           />
         ))}
       </div>
       <DragOverlay>
         {activeId ? (
-          <KanbanCard lead={items.find((i) => i.id === activeId)!} />
+          <KanbanCard lead={items.find((i) => i.id === activeId)!} onConvert={handleConvertLead} />
         ) : null}
       </DragOverlay>
     </DndContext>

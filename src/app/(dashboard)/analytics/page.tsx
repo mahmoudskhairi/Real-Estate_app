@@ -9,8 +9,29 @@ import {
   Activity,
   Target,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { toast } from "@/lib/toast";
+
+interface IncomeData {
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
+  totalIncome: number;
+  numberOfProducts: number;
+}
 
 export default function AnalyticsPage() {
+  const [incomeData, setIncomeData] = useState<IncomeData[]>([]);
+  const [loadingIncome, setLoadingIncome] = useState(true);
+
   const stats = [
     {
       title: "Total Revenue",
@@ -51,10 +72,33 @@ export default function AnalyticsPage() {
     { month: "Jun", revenue: 3.8, deals: 14 },
   ];
 
+  useEffect(() => {
+    const fetchIncomeBreakdown = async () => {
+      try {
+        const response = await fetch("/api/analytics/income-breakdown");
+        if (response.ok) {
+          const data = await response.json();
+          setIncomeData(data);
+        } else {
+          toast.error("Failed to load income breakdown data.");
+        }
+      } catch (error) {
+        console.error("Error fetching income breakdown:", error);
+        toast.error("An error occurred while fetching income data.");
+      } finally {
+        setLoadingIncome(false);
+      }
+    };
+
+    fetchIncomeBreakdown();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent mb-2 dark:text-white dark:bg-none">Analytics</h1>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent mb-2 dark:text-white dark:bg-none">
+          Analytics
+        </h1>
         <p className="text-violet-700 font-medium dark:text-slate-400 dark:font-normal">
           Track your performance and key metrics
         </p>
@@ -74,10 +118,14 @@ export default function AnalyticsPage() {
               <stat.icon className="h-4 w-4 text-purple-600 dark:text-slate-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent dark:text-white dark:bg-none">{stat.value}</div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
+                {stat.value}
+              </div>
               <p
                 className={`text-xs flex items-center gap-1 mt-1 font-semibold ${
-                  stat.trend === "up" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                  stat.trend === "up"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
                 }`}
               >
                 <TrendingUp
@@ -171,9 +219,15 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent dark:text-white dark:bg-none">Sarah Johnson</div>
-              <p className="text-sm font-semibold text-violet-700 dark:text-slate-400 dark:font-normal">12 deals closed</p>
-              <p className="text-xs font-semibold text-green-600 dark:text-green-400">+34% from last month</p>
+              <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
+                Sarah Johnson
+              </div>
+              <p className="text-sm font-semibold text-violet-700 dark:text-slate-400 dark:font-normal">
+                12 deals closed
+              </p>
+              <p className="text-xs font-semibold text-green-600 dark:text-green-400">
+                +34% from last month
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -186,9 +240,15 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent dark:text-white dark:bg-none">$544K</div>
-              <p className="text-sm font-semibold text-purple-700 dark:text-slate-400 dark:font-normal">Last 30 days</p>
-              <p className="text-xs font-semibold text-green-600 dark:text-green-400">+18% from last month</p>
+              <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
+                $544K
+              </div>
+              <p className="text-sm font-semibold text-purple-700 dark:text-slate-400 dark:font-normal">
+                Last 30 days
+              </p>
+              <p className="text-xs font-semibold text-green-600 dark:text-green-400">
+                +18% from last month
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -201,13 +261,66 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div className="text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent dark:text-white dark:bg-none">$24.8M</div>
-              <p className="text-sm font-semibold text-fuchsia-700 dark:text-slate-400 dark:font-normal">Active opportunities</p>
-              <p className="text-xs font-semibold text-green-600 dark:text-green-400">+26% from last month</p>
+              <div className="text-2xl font-bold bg-gradient-to-r from-fuchsia-600 to-pink-600 bg-clip-text text-transparent dark:text-white dark:bg-none">
+                $24.8M
+              </div>
+              <p className="text-sm font-semibold text-fuchsia-700 dark:text-slate-400 dark:font-normal">
+                Active opportunities
+              </p>
+              <p className="text-xs font-semibold text-green-600 dark:text-green-400">
+                +26% from last month
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Income Breakdown Table */}
+      <Card className="border-2 border-green-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-950/50 dark:backdrop-blur-xl">
+        <CardHeader>
+          <CardTitle className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent flex items-center gap-2 dark:text-white dark:bg-none">
+            <DollarSign className="h-5 w-5 text-green-600 dark:text-emerald-400" />
+            Income Breakdown by Client
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingIncome ? (
+            <div className="text-center text-slate-500">
+              Loading income data...
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Total Income</TableHead>
+                  <TableHead className="text-right">
+                    Products Purchased
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {incomeData.map((data) => (
+                  <TableRow key={data.clientId}>
+                    <TableCell>
+                      <div className="font-medium">{data.clientName}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {data.clientEmail}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      ${data.totalIncome.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {data.numberOfProducts}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

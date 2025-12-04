@@ -39,7 +39,8 @@ model User {
   name      String?
   phone     String?
   role      Role     @default(OPERATOR)
-  
+  supervisorId String?
+
   // Preferences
   emailNotifications Boolean @default(true)
   pushNotifications  Boolean @default(false)
@@ -50,6 +51,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
+  supervisor        User?     @relation("Supervision", fields: [supervisorId], references: [id])
+  supervisedUsers   User[]    @relation("Supervision")
   assignedLeads     Lead[]    @relation("OperatorLeads")
   assignedClaims    Claim[]   @relation("OperatorClaims")
   createdComments   Comment[]

@@ -12,9 +12,10 @@ interface Props {
   id: string;
   title: string;
   items: Lead[];
+  onConvert: (leadId: string) => void;
 }
 
-export function KanbanColumn({ id, title, items }: Props) {
+export function KanbanColumn({ id, title, items, onConvert }: Props) {
   const { setNodeRef } = useDroppable({ id });
 
   return (
@@ -35,7 +36,7 @@ export function KanbanColumn({ id, title, items }: Props) {
           strategy={verticalListSortingStrategy}
         >
           {items.map((lead) => (
-            <KanbanCard key={lead.id} lead={lead} />
+            <KanbanCard key={lead.id} lead={lead} onConvert={onConvert} />
           ))}
         </SortableContext>
       </div>

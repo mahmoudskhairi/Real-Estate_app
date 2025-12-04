@@ -4,18 +4,45 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Lead } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/toast";
+import { UserPlus } from "lucide-react";
 
 interface Props {
   lead: Lead;
+  onConvert: (leadId: string) => void;
 }
 
-export function KanbanCard({ lead }: Props) {
+export function KanbanCard({ lead, onConvert }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: lead.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  const handleConvert = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent dnd-kit drag from triggering
+    if (confirm(`Are you sure you want to convert "${lead.name}" to a client?`)) {
+      try {
+        const response = await fetch(`/api/leads/${lead.id}/convert`, {
+          method: 'POST',
+        });
+
+        if (response.ok) {
+          await response.json();
+          toast.success(`Lead "${lead.name}" converted to client successfully!`);
+          onConvert(lead.id); // Notify parent to refetch or update state
+        } else {
+          const error = await response.json();
+          toast.error(error.message || 'Failed to convert lead.');
+        }
+      } catch (error) {
+        console.error("Conversion error:", error);
+        toast.error('An error occurred during conversion.');
+      }
+    }
   };
 
   return (
@@ -26,8 +53,18 @@ export function KanbanCard({ lead }: Props) {
             {lead.name}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-3">
+        <CardContent className="p-3 space-y-2">
           <p className="text-xs text-blue-600 font-medium dark:text-slate-500">{lead.email}</p>
+          {lead.status === 'WON' && (
+            <Button
+              size="xs"
+              className="w-full bg-green-500 hover:bg-green-600 text-white text-xs"
+              onClick={handleConvert}
+            >
+              <UserPlus className="h-3 w-3 mr-1.5" />
+              Convert to Client
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>
