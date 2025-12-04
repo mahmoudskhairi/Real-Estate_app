@@ -79,8 +79,8 @@ export function KanbanCard({ lead, onConvert }: Props) {
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-      <Card className="cursor-grab active:cursor-grabbing border-2 border-indigo-200 bg-gradient-to-br from-white to-indigo-50/30 hover:border-purple-400 hover:shadow-xl transition-all dark:border-slate-800 dark:bg-slate-900/50 dark:from-transparent dark:to-transparent dark:hover:border-indigo-500/50" {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <Card className="cursor-grab active:cursor-grabbing border-2 border-indigo-200 bg-gradient-to-br from-white to-indigo-50/30 hover:border-purple-400 hover:shadow-xl transition-all dark:border-slate-800 dark:bg-slate-900/50 dark:from-transparent dark:to-transparent dark:hover:border-indigo-500/50">
         <CardHeader className="p-3 pb-0">
           <CardTitle className="text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent dark:text-slate-200 dark:bg-none">
             {lead.name}
@@ -89,16 +89,16 @@ export function KanbanCard({ lead, onConvert }: Props) {
         <CardContent className="p-3 space-y-2">
           <p className="text-xs text-blue-600 font-medium dark:text-slate-500">{lead.email}</p>
           {lead.status === 'WON' && (
-            <button
-              type="button"
-              className="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white text-xs px-2 py-1.5 rounded font-medium inline-flex items-center justify-center gap-1 cursor-pointer transition-colors z-50 relative"
-              onClick={handleConvert}
-              onMouseDown={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
-            >
-              <UserPlus className="h-3 w-3" />
-              Convert to Client
-            </button>
+            <div onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} className="pointer-events-auto">
+              <button
+                type="button"
+                className="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white text-xs px-2 py-1.5 rounded font-medium inline-flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                onClick={handleConvert}
+              >
+                <UserPlus className="h-3 w-3" />
+                Convert to Client
+              </button>
+            </div>
           )}
         </CardContent>
       </Card>
