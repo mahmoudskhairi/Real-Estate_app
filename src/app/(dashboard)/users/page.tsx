@@ -445,19 +445,6 @@ export default function UsersPage() {
     </div>
   );
 }
-  };
-
-  const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!canDeleteUsers) {
-      toast.error("You don't have permission to delete users");
-      return;
-    }
-
-    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-      return;
-    }
-
-    try {
       const response = await fetch(`/api/users/${userId}`, {
         method: 'DELETE',
       });
