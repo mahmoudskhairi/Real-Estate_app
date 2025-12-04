@@ -199,6 +199,8 @@ export default function UsersPage() {
         setOpen(false);
         setFormData({ name: "", email: "", phone: "", password: "", role: "", supervisorId: "", operatorId: "" });
         fetchUsers();
+        fetchSupervisors();
+        fetchOperators();
       } else {
         const error = await response.json();
         console.error('Server error:', error);
@@ -228,6 +230,8 @@ export default function UsersPage() {
       if (response.ok) {
         toast.success(`User "${userName}" deleted successfully`);
         fetchUsers();
+        fetchSupervisors();
+        fetchOperators();
       } else {
         const error = await response.json();
         toast.error(error.message || 'Failed to delete user');
