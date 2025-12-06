@@ -159,7 +159,7 @@ model Comment {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
-  lead      Lead?    @relation(fields: [leadId], references: [id])
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
   claim     Claim?   @relation(fields: [claimId], references: [id])
 }
 
@@ -173,6 +173,6 @@ model ActivityLog {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
-  lead      Lead?    @relation(fields: [leadId], references: [id])
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
   claim     Claim?   @relation(fields: [claimId], references: [id])
 }
